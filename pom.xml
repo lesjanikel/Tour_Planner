@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>fhtw</groupId>
-	<artifactId>swen2</artifactId>
+	<artifactId>Tour-Planner</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>swen2</name>
 	<description>Project for Tour Planner</description>
