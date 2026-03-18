@@ -1,0 +1,31 @@
+<div class="bg-gray-200 p-4 mb-4 flex items-center gap-6">
+  <div class="w-40 h-24 bg-gray-400"></div>
+  <div class="text-sm">
+    <p>{{ totalDistance }} km</p>
+    <p>{{ totalTime }}h</p>
+    <p>{{ badge }}</p>
+  </div>
+  <div class="ml-auto">
+    <p class="font-semibold">Achievements</p>
+    <p class="text-sm text-gray-500">No achievements yet</p>
+  </div>
+</div>
+
+<div class="max-w-3xl mx-auto p-4">
+  <div class="flex gap-4 mb-4">
+    <input [(ngModel)]="search" name="search" placeholder="Search Box" class="flex-1 border px-3 py-2 rounded" />
+    <button class="bg-gray-200 px-4 py-2 rounded">Filter</button>
+  </div>
+
+  @for (tour of filteredTours(); track tour.id) {
+    <div class="flex mb-3">
+      <div class="flex-1 bg-gray-200 p-4 flex items-center">
+        <span class="text-xl">{{ tour.name }}</span>
+      </div>
+      <div class="bg-gray-300 flex flex-col justify-center px-4 text-sm">
+        <button (click)="edit(tour.id)" class="hover:underline">Edit</button>
+        <button (click)="delete(tour.id)" class="hover:underline">Delete</button>
+      </div>
+    </div>
+  }
+</div>

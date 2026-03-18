@@ -1,0 +1,20 @@
+<nav class="bg-gray-300 px-6 py-3 flex justify-between items-center relative">
+  @if (isLoggedIn()) {
+    <h1 class="text-xl font-semibold">Hello {{ username() }}!</h1>
+  } @else {
+    <button (click)="goRegister()" class="bg-gray-600 text-white px-4 py-2 rounded">Register</button>
+  }
+
+  <button (click)="goHome()" class="absolute left-1/2 -translate-x-1/2 text-xl font-semibold">
+    Tour Planner
+  </button>
+
+  @if (isLoggedIn()) {
+    <div class="flex gap-3">
+      <button (click)="newTour()" class="bg-gray-500 text-white px-4 py-2 rounded">Create new Tour</button>
+      <button (click)="logout()" class="bg-gray-600 text-white px-4 py-2 rounded">Logout</button>
+    </div>
+  } @else {
+    <button (click)="goLogin()" class="bg-gray-600 text-white px-4 py-2 rounded">Login</button>
+  }
+</nav>
