@@ -35,3 +35,10 @@
     }
   }
 </div>
+
+<app-confirm-modal
+  [visible]="deleteLogTarget !== null"
+  message="Are you sure you want to delete this log?"
+  (yes)="confirmDeleteLog()"
+  (no)="deleteLogTarget = null"
+/>

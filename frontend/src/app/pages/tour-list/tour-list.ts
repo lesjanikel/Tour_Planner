@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TourService } from '../../services/tour';
 import { Tour } from '../../models/tour';
+import {ConfirmModal} from '../../shared/confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-tour-list',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, ConfirmModal],
   templateUrl: './tour-list.html',
 })
 export class TourList implements OnInit {
@@ -16,6 +17,7 @@ export class TourList implements OnInit {
   totalDistance = 0;
   totalTime = 0;
   badge = 'Explorer';
+  deleteTarget: number|null = null;
 
   private tourService = inject(TourService);
   private router = inject(Router);
@@ -39,7 +41,14 @@ export class TourList implements OnInit {
   }
 
   delete(id: number) {
-    this.tourService.delete(id).subscribe(() => this.ngOnInit());
+    this.deleteTarget = id;
+  }
+
+  confirmDelete(){
+    this.tourService.delete(this.deleteTarget!).subscribe(() => {
+      this.deleteTarget = null;
+      this.ngOnInit();
+    })
   }
 
   protected detail(id: number) {

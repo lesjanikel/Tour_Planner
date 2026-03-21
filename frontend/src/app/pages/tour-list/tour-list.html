@@ -29,3 +29,10 @@
     </div>
   }
 </div>
+
+<app-confirm-modal
+  [visible]="deleteTarget !== null"
+  message="Are you sure you want to delete this tour?"
+  (yes)="confirmDelete()"
+  (no)="deleteTarget = null"
+/>

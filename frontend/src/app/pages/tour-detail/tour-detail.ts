@@ -4,11 +4,14 @@ import { TourService } from '../../services/tour';
 import { TourLogService } from '../../services/tour-log';
 import { Tour } from '../../models/tour';
 import { TourLog } from '../../models/tour-log';
+import {ConfirmModal} from '../../shared/confirm-modal/confirm-modal';
 
 @Component({
   selector: 'app-tour-detail',
   standalone: true,
-  imports: [],
+  imports: [
+    ConfirmModal
+  ],
   templateUrl: './tour-detail.html',
 })
 export class TourDetail implements OnInit {
@@ -19,6 +22,7 @@ export class TourDetail implements OnInit {
   private tourLogService = inject(TourLogService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  deleteLogTarget: number | null = null;
 
   ngOnInit() {
     const id = +this.route.snapshot.paramMap.get('id')!;
@@ -29,5 +33,16 @@ export class TourDetail implements OnInit {
   edit() { this.router.navigate(['/tours', this.tour!.id, 'edit']); }
   back() { this.router.navigate(['/tours']); }
   newLog() { this.router.navigate(['/tours', this.tour!.id, 'logs','new']); }
-  deleteLog(id: number) { this.tourLogService.delete(id).subscribe(() => this.ngOnInit()); }
+  deleteLog(id: number) {
+    this.deleteLogTarget = id;
+  }
+
+  confirmDeleteLog(){
+    this.tourLogService.delete(this.deleteLogTarget!).subscribe(() => {
+      this.deleteLogTarget = null;
+      this.ngOnInit();
+      }
+
+    )
+  }
 }
