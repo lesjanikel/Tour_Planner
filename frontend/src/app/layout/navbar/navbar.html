@@ -1,11 +1,11 @@
-<nav class="bg-gray-300 px-6 py-3 flex justify-between items-center relative">
+<nav class="bg-gray-300 px-3 py-2 sm:px-6 sm:py-3 flex-wrap gap-2 flex justify-between items-center relative">
   @if (isLoggedIn()) {
     <h1 class="text-xl font-semibold">Hello {{ username() }}!</h1>
   } @else {
     <button (click)="goRegister()" class="bg-gray-600 text-white px-4 py-2 rounded">Register</button>
   }
 
-  <button (click)="goHome()" class="absolute left-1/2 -translate-x-1/2 text-xl font-semibold">
+  <button (click)="goHome()" class="order-first w-full text-center sm:order-none sm:w-auto sm:absolute sm:left-1/2 sm:-translate-x-1/2 text-xl font-semibold">
     Tour Planner
   </button>
 
