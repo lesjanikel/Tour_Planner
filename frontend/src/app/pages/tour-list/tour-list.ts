@@ -41,4 +41,8 @@ export class TourList implements OnInit {
   delete(id: number) {
     this.tourService.delete(id).subscribe(() => this.ngOnInit());
   }
+
+  protected detail(id: number) {
+    this.router.navigate(['/tours', id]);
+  }
 }

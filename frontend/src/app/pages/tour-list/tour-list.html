@@ -18,13 +18,13 @@
   </div>
 
   @for (tour of filteredTours(); track tour.id) {
-    <div class="flex mb-3">
-      <div class="flex-1 bg-gray-200 p-4 flex items-center">
+    <div class="flex mb-3" >
+      <div class="flex-1 bg-gray-200 p-4 flex items-center hover:bg-gray-400" (click)="detail(tour.id)">
         <span class="text-xl">{{ tour.name }}</span>
       </div>
-      <div class="bg-gray-300 flex flex-col justify-center px-4 text-sm">
-        <button (click)="edit(tour.id)" class="hover:underline">Edit</button>
-        <button (click)="delete(tour.id)" class="hover:underline">Delete</button>
+      <div class="bg-gray-300 flex flex-col justify-center text-sm">
+        <button (click)="edit(tour.id)" class="hover:underline hover:bg-gray-400 flex-1 px-4">Edit</button>
+        <button (click)="delete(tour.id)" class="hover:underline hover:bg-gray-400 flex-1 px-4">Delete</button>
       </div>
     </div>
   }

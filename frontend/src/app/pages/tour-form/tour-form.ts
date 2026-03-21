@@ -34,5 +34,5 @@ export class TourForm implements OnInit {
     }
   }
 
-  cancel() { this.router.navigate(['/']); }
+  cancel() { this.router.navigate(['/tours']); }
 }

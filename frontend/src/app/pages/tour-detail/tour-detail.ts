@@ -27,7 +27,7 @@ export class TourDetail implements OnInit {
   }
 
   edit() { this.router.navigate(['/tours', this.tour!.id, 'edit']); }
-  back() { this.router.navigate(['/']); }
-  newLog() { this.router.navigate(['/tours', this.tour!.id, 'logs/new']); }
+  back() { this.router.navigate(['/tours']); }
+  newLog() { this.router.navigate(['/tours', this.tour!.id, 'logs','new']); }
   deleteLog(id: number) { this.tourLogService.delete(id).subscribe(() => this.ngOnInit()); }
 }
