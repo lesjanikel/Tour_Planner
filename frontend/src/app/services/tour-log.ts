@@ -8,6 +8,7 @@ export class TourLogService {
     { id: 1, tourId: 1, date: '2026-03-01', comment: 'Tolle Tour!', difficulty: 2, totalDistance: 15, totalTime: 180, rating: 5 }
   ];
 
+  getById(id:number): Observable<TourLog | undefined> { return of(this.logs.find(l => l.id === id)); }
   getByTourId(tourId: number): Observable<TourLog[]> { return of(this.logs.filter(l => l.tourId === tourId)); }
   create(log: TourLog): Observable<TourLog> { log.id = Date.now(); this.logs.push(log); return of(log); }
   update(updated: TourLog): Observable<TourLog> { this.logs = this.logs.map(l => l.id === updated.id ? updated : l); return of(updated); }

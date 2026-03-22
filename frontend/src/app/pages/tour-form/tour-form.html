@@ -1,6 +1,8 @@
 <div class="max-w-xl mx-auto p-6">
   <h1 class="text-2xl font-bold mb-6">{{ isEdit ? 'Tour bearbeiten' : 'Neue Tour' }}</h1>
 
+  <app-error-list [errors]="errors"/>
+
   <form (ngSubmit)="save()" class="space-y-4">
     <div>
       <label class="block text-sm font-medium mb-1">Name</label>

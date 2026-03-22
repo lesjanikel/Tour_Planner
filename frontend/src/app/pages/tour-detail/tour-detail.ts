@@ -45,4 +45,8 @@ export class TourDetail implements OnInit {
 
     )
   }
+
+  protected editLog(log: TourLog) {
+    this.router.navigate(['/tours', this.tour!.id, 'logs', log.id, 'edit']);
+  }
 }

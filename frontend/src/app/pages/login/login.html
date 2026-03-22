@@ -1,6 +1,7 @@
 <div class="flex justify-center items-center py-20">
   <div class="bg-gray-200 p-10 rounded w-80">
     <h2 class="text-xl text-center mb-6">Login</h2>
+    <app-error-list [errors]="errors"/>
     <form (ngSubmit)="login()" class="space-y-4">
       <div>
         <label class="block text-sm mb-1">username</label>

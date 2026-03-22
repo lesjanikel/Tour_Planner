@@ -17,5 +17,6 @@ export const routes: Routes = [
   { path: 'tours/:id', component: TourDetail, canActivate: [authGuard] },
   { path: 'tours/:id/edit', component: TourForm, canActivate: [authGuard] },
   { path: 'tours/:id/logs/new', component: TourLogForm, canActivate: [authGuard] },
+  { path: 'tours/:id/logs/:logId/edit', component: TourLogForm, canActivate: [authGuard] },
   { path: '**', redirectTo: '' }
 ];

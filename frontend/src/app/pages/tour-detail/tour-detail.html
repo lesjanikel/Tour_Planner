@@ -26,7 +26,10 @@
           <p class="text-sm text-gray-600 mt-1">{{ log.comment }}</p>
           <p class="text-sm text-gray-500 mt-1">{{ log.totalDistance }} km · {{ log.totalTime }} min · Schwierigkeit: {{ log.difficulty }} · Bewertung: {{ log.rating }}/5</p>
         </div>
-        <button (click)="deleteLog(log.id)" class="text-red-500 hover:text-red-700 text-sm">Löschen</button>
+        <div class="flex gap-2">
+          <button (click)="editLog(log)" class="text-blue-500 hover:text-blue-700 text-sm">Bearbeiten</button>
+          <button (click)="deleteLog(log.id)" class="text-red-500 hover:text-red-700 text-sm">Löschen</button>
+        </div>
       </div>
     }
 
