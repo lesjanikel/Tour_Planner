@@ -32,19 +32,19 @@ export class TourLogForm implements OnInit {
   save() {
     this.errors = [];
     if (!this.log.date) {
-      this.errors.push('Datum ist erforderlich.');
+      this.errors.push('Date is required.');
     }
     if (this.log.totalDistance < 0) {
-      this.errors.push('Distanz darf nicht negativ sein.');
+      this.errors.push('Distance cannot be negative.');
     }
     if (this.log.totalTime < 0) {
-      this.errors.push('Zeit darf nicht negativ sein.');
+      this.errors.push('Time cannot be negative.');
     }
     if (this.log.difficulty < 1 || this.log.difficulty > 5) {
-      this.errors.push('Schwierigkeit muss zwischen 1 und 5 liegen.');
+      this.errors.push('Difficulty must be between 1 and 5.');
     }
     if (this.log.rating < 1 || this.log.rating > 5) {
-      this.errors.push('Bewertung muss zwischen 1 und 5 liegen.');
+      this.errors.push('Rating must be between 1 and 5.');
     }
 
     if (this.errors.length > 0) return;

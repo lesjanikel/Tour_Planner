@@ -5,8 +5,8 @@ import { Tour } from '../models/tour';
 @Injectable({ providedIn: 'root' })
 export class TourService {
   private tours: Tour[] = [
-    { id: 1, name: 'Wienerwald Hike', description: 'Schöne Wanderung', from: 'Wien', to: 'Klosterneuburg', transportType: 'Hike', distance: 15, estimatedTime: 180 },
-    { id: 2, name: 'Donauradweg', description: 'Fahrradtour', from: 'Wien', to: 'Tulln', transportType: 'Bike', distance: 40, estimatedTime: 120 }
+    { id: 1, name: 'Wienerwald Hike', description: 'Scenic hike through the Wienerwald', from: 'Vienna', to: 'Klosterneuburg', transportType: 'Hike', distance: 15, estimatedTime: 180, imagePath: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"},
+    { id: 2, name: 'Donauradweg', description: 'Cycling tour along the Danube', from: 'Vienna', to: 'Tulln', transportType: 'Bike', distance: 40, estimatedTime: 120, imagePath: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800" }
   ];
 
   getAll(): Observable<Tour[]> { return of(this.tours); }

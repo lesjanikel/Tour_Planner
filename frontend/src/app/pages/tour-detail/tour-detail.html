@@ -1,5 +1,5 @@
 <div class="max-w-3xl mx-auto p-6">
-  <button (click)="back()" class="text-sm text-gray-500 hover:text-gray-700 mb-4">← Zurück</button>
+  <button (click)="back()" class="text-sm text-gray-500 hover:text-gray-700 mb-4">← Back</button>
 
   @if (tour) {
     <div class="bg-white rounded shadow p-6 mb-6">
@@ -10,31 +10,40 @@
           <p class="mt-3">{{ tour.description }}</p>
           <p class="text-sm text-gray-500 mt-2">{{ tour.distance }} km · {{ tour.estimatedTime }} min</p>
         </div>
-        <button (click)="edit()" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 text-sm">Bearbeiten</button>
+        <button (click)="edit()" class="bg-gray-200 px-3 py-1 rounded hover:bg-gray-300 text-sm">Edit</button>
       </div>
     </div>
+    @if (tour.imagePath) {
+      <img [src]="tour.imagePath" alt="{{ tour.name }}" class="w-full h-48 object-cover rounded mb-4" />
+    } @else {
+      <div class="bg-gray-200 h-48 flex items-center justify-center text-gray-400 rounded mb-4">No image available</div>
+    }
 
+    <div class="bg-gray-200 h-48 flex items-center justify-center text-gray-400 rounded mb-6">
+      Map Placeholder
+    </div>
     <div class="flex justify-between items-center mb-4">
       <h2 class="text-xl font-semibold">Tour Logs</h2>
-      <button (click)="newLog()" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm">+ Log hinzufügen</button>
+      <button (click)="newLog()" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm">+ Add Log</button>
     </div>
+
 
     @for (log of logs; track log.id) {
       <div class="bg-white rounded shadow p-4 mb-3 flex justify-between items-start">
         <div>
           <p class="font-medium">{{ log.date }}</p>
           <p class="text-sm text-gray-600 mt-1">{{ log.comment }}</p>
-          <p class="text-sm text-gray-500 mt-1">{{ log.totalDistance }} km · {{ log.totalTime }} min · Schwierigkeit: {{ log.difficulty }} · Bewertung: {{ log.rating }}/5</p>
+          <p class="text-sm text-gray-500 mt-1">{{ log.totalDistance }} km · {{ log.totalTime }} min · Difficulty: {{ log.difficulty }} · Rating: {{ log.rating }}/5</p>
         </div>
         <div class="flex gap-2">
-          <button (click)="editLog(log)" class="text-blue-500 hover:text-blue-700 text-sm">Bearbeiten</button>
-          <button (click)="deleteLog(log.id)" class="text-red-500 hover:text-red-700 text-sm">Löschen</button>
+          <button (click)="editLog(log)" class="text-blue-500 hover:text-blue-700 text-sm">Edit</button>
+          <button (click)="deleteLog(log.id)" class="text-red-500 hover:text-red-700 text-sm">Delete</button>
         </div>
       </div>
     }
 
     @if (logs.length === 0) {
-      <p class="text-gray-400">Noch keine Logs vorhanden.</p>
+      <p class="text-gray-400">No Logs yet.</p>
     }
   }
 </div>

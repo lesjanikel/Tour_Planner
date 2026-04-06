@@ -16,12 +16,13 @@ export class Navbar {
   isLoggedIn = this.authService.isLoggedIn;
   username = this.authService.user;
 
+  goHome()  { this.router.navigate(['/']); }
+  goTours() { this.router.navigate(['/tours']); }
   goLogin() { this.router.navigate(['/login']); }
   goRegister() { this.router.navigate(['/register']); }
   newTour() { this.router.navigate(['/tours/new']); }
   logout() { this.authService.logout(); this.router.navigate(['/']); }
 
- goHome() {this.router.navigate([''])
-  }
+
 
 }

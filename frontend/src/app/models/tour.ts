@@ -7,5 +7,6 @@ export interface Tour {
   transportType: 'Hike' | 'Bike' | 'Running' | 'Train';
   distance: number;
   estimatedTime: number;
+  imagePath: string;
 }
 

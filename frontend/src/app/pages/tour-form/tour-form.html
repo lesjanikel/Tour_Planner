@@ -1,5 +1,5 @@
 <div class="max-w-xl mx-auto p-6">
-  <h1 class="text-2xl font-bold mb-6">{{ isEdit ? 'Tour bearbeiten' : 'Neue Tour' }}</h1>
+  <h1 class="text-2xl font-bold mb-6">{{ isEdit ? 'Edit tour' : 'New Tour' }}</h1>
 
   <app-error-list [errors]="errors"/>
 
@@ -9,16 +9,16 @@
       <input [(ngModel)]="tour.name" name="name" class="w-full border rounded px-3 py-2" required />
     </div>
     <div>
-      <label class="block text-sm font-medium mb-1">Beschreibung</label>
+      <label class="block text-sm font-medium mb-1">Description</label>
       <textarea [(ngModel)]="tour.description" name="description" class="w-full border rounded px-3 py-2"></textarea>
     </div>
     <div class="flex gap-4">
       <div class="flex-1">
-        <label class="block text-sm font-medium mb-1">Von</label>
+        <label class="block text-sm font-medium mb-1">From</label>
         <input [(ngModel)]="tour.from" name="from" class="w-full border rounded px-3 py-2" required />
       </div>
       <div class="flex-1">
-        <label class="block text-sm font-medium mb-1">Nach</label>
+        <label class="block text-sm font-medium mb-1">To</label>
         <input [(ngModel)]="tour.to" name="to" class="w-full border rounded px-3 py-2" required />
       </div>
     </div>
@@ -33,17 +33,21 @@
     </div>
     <div class="flex gap-4">
       <div class="flex-1">
-        <label class="block text-sm font-medium mb-1">Distanz (km)</label>
+        <label class="block text-sm font-medium mb-1">Distance (km)</label>
         <input [(ngModel)]="tour.distance" name="distance" type="number" class="w-full border rounded px-3 py-2" />
       </div>
       <div class="flex-1">
-        <label class="block text-sm font-medium mb-1">Zeit (min)</label>
+        <label class="block text-sm font-medium mb-1">Time (min)</label>
         <input [(ngModel)]="tour.estimatedTime" name="estimatedTime" type="number" class="w-full border rounded px-3 py-2" />
       </div>
     </div>
+    <div>
+      <label class="block text-sm font-medium mb-1">Image Path</label>
+      <input [(ngModel)]="tour.imagePath" name="imageUrl" class="w-full border rounded px-3 py-2" required />
+    </div>
     <div class="flex gap-3 pt-2">
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Speichern</button>
-      <button type="button" (click)="cancel()" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Abbrechen</button>
+      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+      <button type="button" (click)="cancel()" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Cancel</button>
     </div>
   </form>
 </div>

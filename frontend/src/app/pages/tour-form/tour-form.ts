@@ -12,7 +12,7 @@ import {ErrorList} from '../../shared/error-list/error-list';
   templateUrl: './tour-form.html',
 })
 export class TourForm implements OnInit {
-  tour: Tour = { id: 0, name: '', description: '', from: '', to: '', transportType: 'Hike', distance: 0, estimatedTime: 0 };
+  tour: Tour = { id: 0, name: '', description: '', from: '', to: '', transportType: 'Hike', distance: 0, estimatedTime: 0, imagePath: '' };
   isEdit = false;
   errors: string[] = [];
 
@@ -33,19 +33,19 @@ export class TourForm implements OnInit {
 
 
     if (!this.tour.name?.trim() || this.tour.name.trim().length < 3) {
-      this.errors.push('Name muss mindestens 3 Zeichen lang sein.');
+      this.errors.push('Name must be at least 3 characters long.');
     }
     if (!this.tour.from?.trim()) {
-      this.errors.push('Startort ist erforderlich.');
+      this.errors.push('Starting location is required.');
     }
     if (!this.tour.to?.trim()) {
-      this.errors.push('Zielort ist erforderlich.');
+      this.errors.push('Destination is required.');
     }
     if (this.tour.distance < 0) {
-      this.errors.push('Distanz darf nicht negativ sein.');
+      this.errors.push('Distance cannot be negative.');
     }
     if (this.tour.estimatedTime < 0) {
-      this.errors.push('Zeit darf nicht negativ sein.');
+      this.errors.push('Time cannot be negative.');
     }
 
     if (this.errors.length > 0) return;
