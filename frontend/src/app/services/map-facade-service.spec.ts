@@ -1,13 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 
-import { TourLogService } from './tour-log';
+import { MapFacadeService } from './map-facade-service';
 
-describe('TourLog', () => {
-  let service: TourLogService;
+describe('MapFacadeService', () => {
+  let service: MapFacadeService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({});
-    service = TestBed.inject(TourLogService);
+    service = TestBed.inject(MapFacadeService);
   });
 
   it('should be created', () => {

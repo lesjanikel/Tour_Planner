@@ -1,10 +1,11 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TourService } from '../../services/tour';
 import { TourLogService } from '../../services/tour-log';
 import { Tour } from '../../models/tour';
 import { TourLog } from '../../models/tour-log';
 import {ConfirmModal} from '../../shared/confirm-modal/confirm-modal';
+import {MapFacadeService} from '../../services/map-facade-service';
 
 @Component({
   selector: 'app-tour-detail',
@@ -14,7 +15,7 @@ import {ConfirmModal} from '../../shared/confirm-modal/confirm-modal';
   ],
   templateUrl: './tour-detail.html',
 })
-export class TourDetail implements OnInit {
+export class TourDetail implements OnInit, AfterViewInit {
   tour?: Tour;
   logs: TourLog[] = [];
 
@@ -22,12 +23,17 @@ export class TourDetail implements OnInit {
   private tourLogService = inject(TourLogService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private mapFacadeService = inject(MapFacadeService);
   deleteLogTarget: number | null = null;
 
   ngOnInit() {
-    const id = +this.route.snapshot.paramMap.get('id')!;
-    this.tourService.getById(id).subscribe(t => this.tour = t);
+  const id = +this.route.snapshot.paramMap.get('id')!;
+    this.tourService.getById(id).subscribe(t => ( this.tour = t));
     this.tourLogService.getByTourId(id).subscribe(l => this.logs = l);
+  }
+
+  ngAfterViewInit() {
+    this.mapFacadeService.initMap("map");
   }
 
   edit() { this.router.navigate(['/tours', this.tour!.id, 'edit']); }

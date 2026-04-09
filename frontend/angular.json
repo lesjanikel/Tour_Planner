@@ -37,9 +37,14 @@
                 "input": "src/styles.css",
                 "inject": true,
                 "bundleName": "styles"
+              },
+              {
+                "input":"node_modules/leaflet/dist/leaflet.css",
+                "inject": true,
+                "bundleName": "styles"
               }
             ],
-            "outputMode": "static",
+            "outputMode": "static"
           },
           "configurations": {
             "production": {
