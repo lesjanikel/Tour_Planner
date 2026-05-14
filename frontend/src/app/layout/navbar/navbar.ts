@@ -13,7 +13,9 @@ export class Navbar {
   private router = inject(Router);
   private authService = inject(AuthService);
 
-  isLoggedIn = this.authService.isLoggedIn;
+  isLoggedIn() {
+    return this.authService.isLoggedIn();
+  }
   username = this.authService.user;
 
   goHome()  { this.router.navigate(['/']); }

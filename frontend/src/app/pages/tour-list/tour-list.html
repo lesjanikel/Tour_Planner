@@ -3,11 +3,9 @@
   <div class="text-sm">
     <p>{{ totalDistance }} km</p>
     <p>{{ totalTime }}h</p>
-    <p>{{ badge }}</p>
   </div>
   <div class="ml-auto">
-    <p class="font-semibold">Achievements</p>
-    <p class="text-sm text-gray-500">No achievements yet</p>
+    <app-achievements [achievements]="achievements"></app-achievements>
   </div>
 </div>
 

@@ -1,41 +1,43 @@
 import { Component, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import {ErrorList} from '../../shared/error-list/error-list';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-register',
   standalone: true,
-  imports: [FormsModule, ErrorList],
+  imports: [ ReactiveFormsModule ],
   templateUrl: './register.html',
 })
 export class Register {
-  username = '';
-  password = '';
-  passwordConfirm = '';
-  accepted = false;
+  form = new FormGroup({
+    username: new FormControl('', [Validators.required]),
 
-  errors: string[] = [];
+    password: new FormControl('', [
+      Validators.required,
+      Validators.minLength(6),
+      Validators.pattern(/^(?=.*[A-Z])(?=.*\d).+$/)
+    ]),
+
+    passwordConfirm: new FormControl('', [Validators.required]),
+
+    accepted: new FormControl(false, [Validators.requiredTrue] )
+  });
 
   private router = inject(Router);
 
   register() {
-    this.errors = [];
+    if (
+      this.form.value.password !==
+      this.form.value.passwordConfirm
+    ) {
+      this.form.controls.passwordConfirm.setErrors({
+        mismatch: true
+      });
 
-    if (!this.username.trim()) {
-      this.errors.push('Username is required.');
-    }
-    if (!this.password || this.password.length < 6) {
-      this.errors.push('Password must be at least 6 characters.');
-    }
-    if (this.password !== this.passwordConfirm) {
-      this.errors.push('Passwords do not match.');
-    }
-    if (!this.accepted) {
-      this.errors.push('You must accept the user agreement.');
-    }
+      this.form.controls.passwordConfirm.markAsTouched();
 
-    if (this.errors.length > 0) return;
+      return;
+    }
 
     this.router.navigate(['/login']);
   }

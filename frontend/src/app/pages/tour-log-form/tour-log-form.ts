@@ -34,6 +34,9 @@ export class TourLogForm implements OnInit {
     if (!this.log.date) {
       this.errors.push('Date is required.');
     }
+    if (!this.log.comment || this.log.comment.trim().length < 3) {
+      this.errors.push('Comment must be at least 3 characters.');
+    }
     if (this.log.totalDistance < 0) {
       this.errors.push('Distance cannot be negative.');
     }

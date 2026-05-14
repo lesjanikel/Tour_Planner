@@ -1,30 +1,63 @@
 <div class="max-w-xl mx-auto p-6">
   <h1 class="text-2xl font-bold mb-6">{{ isEdit ? 'Edit tour' : 'New Tour' }}</h1>
 
-  <app-error-list [errors]="errors"/>
-
-  <form (ngSubmit)="save()" class="space-y-4">
+  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
     <div>
       <label class="block text-sm font-medium mb-1">Name</label>
-      <input [(ngModel)]="tour.name" name="name" class="w-full border rounded px-3 py-2" required />
+      <input formControlName="name" name="name" class="w-full border rounded px-3 py-2" required />
+      @if (
+        form.controls.name.touched &&
+        form.controls.name.errors?.['required']
+        ) { <p class="text-red-600 text-sm mt-1"> Name is required. </p>
+      }
+
+      @if (
+        form.controls.name.touched &&
+        form.controls.name.errors?.['minlength']
+        ) { <p class="text-red-600 text-sm mt-1"> Name must be at least 3 characters long. </p>
+      }
     </div>
     <div>
       <label class="block text-sm font-medium mb-1">Description</label>
-      <textarea [(ngModel)]="tour.description" name="description" class="w-full border rounded px-3 py-2"></textarea>
+      <textarea formControlName="description" name="description" class="w-full border rounded px-3 py-2"></textarea>
+      @if (
+        form.controls.description.touched &&
+        form.controls.description.errors?.['required']
+        ) { <p class="text-red-600 text-sm mt-1"> Description is required. </p>
+      }
+
+      @if (
+        form.controls.description.touched &&
+        form.controls.description.errors?.['minlength']
+        ) {
+        <p class="text-red-600 text-sm mt-1"> Description must be at least 3 characters long. </p>
+      }
     </div>
     <div class="flex gap-4">
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">From</label>
-        <input [(ngModel)]="tour.from" name="from" class="w-full border rounded px-3 py-2" required />
+        <input formControlName="from" name="from" class="w-full border rounded px-3 py-2" required />
+        @if (
+          form.controls.from.touched &&
+          form.controls.from.errors?.['required']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Starting location is required. </p>
+        }
       </div>
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">To</label>
-        <input [(ngModel)]="tour.to" name="to" class="w-full border rounded px-3 py-2" required />
+        <input formControlName="to" name="to" class="w-full border rounded px-3 py-2" required />
+        @if (
+          form.controls.to.touched &&
+          form.controls.to.errors?.['required']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Destination is required. </p>
+        }
       </div>
     </div>
     <div>
       <label class="block text-sm font-medium mb-1">Transport</label>
-      <select [(ngModel)]="tour.transportType" name="transportType" class="w-full border rounded px-3 py-2">
+      <select formControlName="transportType" name="transportType" class="w-full border rounded px-3 py-2">
         <option>Hike</option>
         <option>Bike</option>
         <option>Running</option>
@@ -34,16 +67,16 @@
     <div class="flex gap-4">
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">Distance (km)</label>
-        <input [(ngModel)]="tour.distance" name="distance" type="number" class="w-full border rounded px-3 py-2" />
+        <input formControlName="distance" name="distance" type="number" class="w-full border rounded px-3 py-2" />
       </div>
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">Time (min)</label>
-        <input [(ngModel)]="tour.estimatedTime" name="estimatedTime" type="number" class="w-full border rounded px-3 py-2" />
+        <input formControlName="estimatedTime" name="estimatedTime" type="number" class="w-full border rounded px-3 py-2" />
       </div>
     </div>
     <div>
       <label class="block text-sm font-medium mb-1">Image Path</label>
-      <input [(ngModel)]="tour.imagePath" name="imageUrl" class="w-full border rounded px-3 py-2" required />
+      <input formControlName="imagePath" name="imageUrl" class="w-full border rounded px-3 py-2" required />
     </div>
     <div class="flex gap-3 pt-2">
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>

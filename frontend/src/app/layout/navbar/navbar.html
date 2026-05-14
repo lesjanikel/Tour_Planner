@@ -1,7 +1,4 @@
 <nav class="bg-gray-300 px-3 py-2 sm:px-6 sm:py-3 flex-wrap gap-2 flex justify-between items-center relative">
-  @if (!isLoggedIn()) {
-    <button (click)="goRegister()" class="bg-gray-600 text-white px-4 py-2 rounded">Register</button>
-  }
 
   @if (isLoggedIn()) {
     <button (click)="goTours()" class="order-first w-full text-center sm:order-none sm:w-auto sm:absolute sm:left-1/2 sm:-translate-x-1/2 text-xl font-semibold">
@@ -19,6 +16,8 @@
 
   } @else {
     <button (click)="goLogin()" class="bg-gray-600 text-white px-4 py-2 rounded">Login</button>
+    <button (click)="goRegister()" class="bg-gray-600 text-white px-4 py-2 rounded">Register</button>
+
   }
   </div>
 </nav>

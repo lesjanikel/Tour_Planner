@@ -1,11 +1,12 @@
-import { Component, inject, OnInit, AfterViewInit } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, DestroyRef } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { TourService } from '../../services/tour';
 import { TourLogService } from '../../services/tour-log';
 import { Tour } from '../../models/tour';
 import { TourLog } from '../../models/tour-log';
-import {ConfirmModal} from '../../shared/confirm-modal/confirm-modal';
-import {MapFacadeService} from '../../services/map-facade-service';
+import { ConfirmModal } from '../../shared/confirm-modal/confirm-modal';
+import { MapFacadeService } from '../../services/map-facade-service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-tour-detail',
@@ -23,13 +24,18 @@ export class TourDetail implements OnInit, AfterViewInit {
   private tourLogService = inject(TourLogService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
+  private destroyRef = inject(DestroyRef);
   private mapFacadeService = inject(MapFacadeService);
   deleteLogTarget: number | null = null;
 
+  loadData() {
+    const id = +this.route.snapshot.paramMap.get('id')!;
+    this.tourService.getById(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(t => (this.tour = t));
+    this.tourLogService.getByTourId(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(l => this.logs = l);
+  }
+
   ngOnInit() {
-  const id = +this.route.snapshot.paramMap.get('id')!;
-    this.tourService.getById(id).subscribe(t => ( this.tour = t));
-    this.tourLogService.getByTourId(id).subscribe(l => this.logs = l);
+    this.loadData();
   }
 
   ngAfterViewInit() {
@@ -46,9 +52,8 @@ export class TourDetail implements OnInit, AfterViewInit {
   confirmDeleteLog(){
     this.tourLogService.delete(this.deleteLogTarget!).subscribe(() => {
       this.deleteLogTarget = null;
-      this.ngOnInit();
+      this.loadData();
       }
-
     )
   }
 

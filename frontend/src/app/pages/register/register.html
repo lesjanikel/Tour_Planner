@@ -1,22 +1,66 @@
 <div class="flex justify-center items-center py-20">
   <div class="bg-gray-200 p-10 rounded w-80">
     <h2 class="text-xl text-center mb-6">Register</h2>
-    <app-error-list [errors]="errors" />
-    <form (ngSubmit)="register()" class="space-y-4">
+    <form [formGroup]="form" (ngSubmit)="register()" class="space-y-4">
       <div>
         <label class="block text-sm mb-1">username</label>
-        <input [(ngModel)]="username" name="username" class="w-full border rounded px-3 py-2" />
+        <input formControlName="username" name="username" class="w-full border rounded px-3 py-2" />
+        @if (
+          form.controls.username.touched &&
+          form.controls.username.errors?.['required']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Username is required. </p>
+        }
       </div>
       <div>
         <label class="block text-sm mb-1">password</label>
-        <input [(ngModel)]="password" name="password" type="password" class="w-full border rounded px-3 py-2" />
+        <input formControlName="password" name="password" type="password" class="w-full border rounded px-3 py-2" />
+        @if (
+          form.controls.password.touched &&
+          form.controls.password.errors?.['required']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Password is required. </p>
+        }
+
+        @if (
+          form.controls.password.touched &&
+          form.controls.password.errors?.['minlength']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Password must be at least 6 characters. </p>
+        }
+
+        @if (
+          form.controls.password.touched &&
+          form.controls.password.errors?.['pattern']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Password must contain at least one uppercase letter and one number. </p>
+        }
       </div>
       <div>
         <label class="block text-sm mb-1">re-enter password</label>
-        <input [(ngModel)]="passwordConfirm" name="passwordConfirm" type="password" class="w-full border rounded px-3 py-2" />
+        <input formControlName="passwordConfirm" name="passwordConfirm" type="password" class="w-full border rounded px-3 py-2" />
+        @if (
+          form.controls.passwordConfirm.touched &&
+          form.controls.passwordConfirm.errors?.['required']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Please confirm your password. </p>
+        }
+
+        @if (
+          form.controls.passwordConfirm.touched &&
+          form.controls.passwordConfirm.errors?.['mismatch']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> Passwords do not match. </p>
+        }
       </div>
       <div class="flex items-center gap-2">
-        <input [(ngModel)]="accepted" name="accepted" type="checkbox" />
+        <input formControlName="accepted" name="accepted" type="checkbox" />
+        @if (
+          form.controls.accepted.touched &&
+          form.controls.accepted.errors?.['required']
+          ) {
+          <p class="text-red-600 text-sm mt-1"> You must accept the user agreement. </p>
+        }
         <label class="text-sm">I accept the user agreement</label>
       </div>
       <button type="submit" class="w-full bg-gray-600 text-white py-2 rounded">Create account</button>

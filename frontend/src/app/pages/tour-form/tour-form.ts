@@ -1,20 +1,41 @@
 import { Component, inject, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TourService } from '../../services/tour';
 import { Tour } from '../../models/tour';
-import {ErrorList} from '../../shared/error-list/error-list';
 
 @Component({
   selector: 'app-tour-form',
   standalone: true,
-  imports: [FormsModule, ErrorList],
+  imports: [ ReactiveFormsModule ],
   templateUrl: './tour-form.html',
 })
 export class TourForm implements OnInit {
   tour: Tour = { id: 0, name: '', description: '', from: '', to: '', transportType: 'Hike', distance: 0, estimatedTime: 0, imagePath: '' };
   isEdit = false;
-  errors: string[] = [];
+  form = new FormGroup({
+    name: new FormControl('', [
+      Validators.required,
+      Validators.minLength(3)
+    ]),
+
+    description: new FormControl('', [
+      Validators.required,
+      Validators.minLength(3)
+    ]),
+
+    from: new FormControl('', [ Validators.required ]),
+
+    to: new FormControl('', [ Validators.required ]),
+
+    transportType: new FormControl('Hike', [ Validators.required ]),
+
+    distance: new FormControl(0, [ Validators.min(0) ]),
+
+    estimatedTime: new FormControl(0, [ Validators.min(0) ]),
+
+    imagePath: new FormControl('')
+  });
 
   private tourService = inject(TourService);
   private router = inject(Router);
@@ -24,32 +45,25 @@ export class TourForm implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.isEdit = true;
-      this.tourService.getById(+id).subscribe(t => { if (t) this.tour = {...t}; });
+      this.tourService.getById(+id).subscribe(t => {
+        if (t) {
+          this.tour = {...t};
+          this.form.patchValue(t);
+        }
+      });
     }
   }
 
   save() {
-    this.errors = [];
-
-
-    if (!this.tour.name?.trim() || this.tour.name.trim().length < 3) {
-      this.errors.push('Name must be at least 3 characters long.');
-    }
-    if (!this.tour.from?.trim()) {
-      this.errors.push('Starting location is required.');
-    }
-    if (!this.tour.to?.trim()) {
-      this.errors.push('Destination is required.');
-    }
-    if (this.tour.distance < 0) {
-      this.errors.push('Distance cannot be negative.');
-    }
-    if (this.tour.estimatedTime < 0) {
-      this.errors.push('Time cannot be negative.');
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
     }
 
-    if (this.errors.length > 0) return;
-
+    this.tour = {
+      ...this.tour,
+      ...this.form.value
+    } as Tour;
 
     if (this.isEdit) {
       this.tourService.update(this.tour).subscribe(() => this.router.navigate(['/tours', this.tour.id]));

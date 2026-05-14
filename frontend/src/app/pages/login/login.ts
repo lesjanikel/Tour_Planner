@@ -1,39 +1,30 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { Router, RouterLink } from '@angular/router';
+import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth';
-import {ErrorList} from '../../shared/error-list/error-list';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, ErrorList],
+  imports: [ReactiveFormsModule, RouterLink],
   templateUrl: './login.html',
 })
 export class Login {
-  username = '';
-  password = '';
-
-  errors: string[] = [];
+  form = new FormGroup({
+    username: new FormControl('', [ Validators.required ]),
+    password: new FormControl('', [ Validators.required ])
+  });
 
   private router = inject(Router);
   private authService = inject(AuthService);
 
   login() {
-    this.errors = [];
-
-    if (!this.username.trim()) {
-      this.errors.push('Username is required.');
-    }
-    if (!this.password) {
-      this.errors.push('Password is required.');
+    if (this.form.invalid) {
+      this.form.markAllAsTouched();
+      return;
     }
 
-    if (this.errors.length > 0) return;
-
-    this.authService.login(this.username, this.password);
-    this.router.navigate(['/tours']);
+    this.authService.login(this.form.value.username!, this.form.value.password!);
+      this.router.navigate(['/tours']);
   }
-
-  goRegister() { this.router.navigate(['/register']); }
 }
