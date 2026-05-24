@@ -23,6 +23,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tourplanner
       SPRING_DATASOURCE_USERNAME: tourplanner
       SPRING_DATASOURCE_PASSWORD: tourplanner
+      APP_JWT_SECRET: zqj3chY8QWyDLzj6H9pwqfwpxdOTlq5v1FmG45RMYtvOWOF9Aq8Wccf2WuDToPuX
     ports:
       - "8080:8080"
     depends_on:

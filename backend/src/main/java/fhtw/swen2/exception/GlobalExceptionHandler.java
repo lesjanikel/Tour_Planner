@@ -28,4 +28,14 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleBadRequest(IllegalArgumentException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
+
+    @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
+    public ProblemDetail handleBadCredentials(Exception ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid credentials");
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ProblemDetail handleAccessDenied(Exception ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access denied");
+    }
 }
