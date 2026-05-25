@@ -38,4 +38,8 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleAccessDenied(Exception ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access denied");
     }
+    @ExceptionHandler(UpstreamUnavailableException.class)
+    public ProblemDetail handleUpstream(UpstreamUnavailableException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
+    }
 }

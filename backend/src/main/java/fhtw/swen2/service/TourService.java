@@ -6,6 +6,8 @@ import fhtw.swen2.exception.NotFoundException;
 import fhtw.swen2.model.Tour;
 import fhtw.swen2.model.User;
 import fhtw.swen2.repository.TourRepository;
+import fhtw.swen2.service.client.ors.OrsClient;
+import fhtw.swen2.service.client.ors.OrsRouteResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,9 +18,11 @@ import java.util.List;
 public class TourService {
 
     private final TourRepository tourRepository;
+    private final OrsClient orsClient;
 
-    public TourService(TourRepository tourRepository){
+    public TourService(TourRepository tourRepository, OrsClient orsClient){
         this.tourRepository = tourRepository;
+        this.orsClient = orsClient;
     }
 
     @Transactional(readOnly = true)
@@ -45,8 +49,14 @@ public class TourService {
         tour.setToLon(request.toLon());
         tour.setTransportType(request.transportType());
         tour.setOwner(requester);
-        tour.setDistanceKm(0);   // TODO ORS
-        tour.setDurationSec(0);
+        OrsRouteResult route = orsClient.directions(
+                request.fromLat(), request.fromLon(),
+                request.toLat(), request.toLon(),
+                request.transportType()
+        );
+        tour.setDistanceKm(route.distanceKm());
+        tour.setDurationSec(route.durationSec());
+        tour.setRouteGeoJson(route.geometry());
         return toDto(tourRepository.save(tour));
     }
 
@@ -61,6 +71,14 @@ public class TourService {
         tour.setToLat(request.toLat());
         tour.setToLon(request.toLon());
         tour.setTransportType(request.transportType());
+        OrsRouteResult route = orsClient.directions(
+                request.fromLat(), request.fromLon(),
+                request.toLat(), request.toLon(),
+                request.transportType()
+        );
+        tour.setDistanceKm(route.distanceKm());
+        tour.setDurationSec(route.durationSec());
+        tour.setRouteGeoJson(route.geometry());
         return toDto(tour);
     }
 
