@@ -4,6 +4,7 @@ import fhtw.swen2.dto.CreateTourRequest;
 import fhtw.swen2.dto.TourDto;
 import fhtw.swen2.exception.NotFoundException;
 import fhtw.swen2.model.Tour;
+import fhtw.swen2.model.TourLog;
 import fhtw.swen2.model.User;
 import fhtw.swen2.repository.TourRepository;
 import fhtw.swen2.service.client.ors.OrsClient;
@@ -97,13 +98,35 @@ public class TourService {
     }
 
     private TourDto toDto(Tour tour) {
+
+
+        List<TourLog> tourLogs = tour.getLogs();
+        int popularity = tourLogs.size();
+        Boolean childFriendly = computeChildFriendly(tourLogs);
+
         return new TourDto(
                 tour.getId(), tour.getName(), tour.getDescription(),
                 tour.getFromName(), tour.getFromLat(), tour.getFromLon(),
                 tour.getToName(), tour.getToLat(), tour.getToLon(),
                 tour.getTransportType(), tour.getDistanceKm(), tour.getDurationSec(),
                 tour.getRouteGeoJson(), tour.getImageFilename(),
-                tour.getOwner().getId()
+                tour.getOwner().getId(),
+                popularity,childFriendly
         );
+    }
+
+    private Boolean computeChildFriendly(List<TourLog> logs) {
+        if (logs.isEmpty()) return null;          // unknown
+
+        double avgDifficulty = logs.stream().mapToInt(TourLog::getDifficulty).average().orElse(0);
+        double avgTimeMin    = logs.stream().mapToLong(TourLog::getTotalTime).average().orElse(0);
+        double avgDistanceKm = logs.stream().mapToDouble(TourLog::getTotalDistance).average().orElse(0);
+
+        double d01 = avgDifficulty / 5.0;
+        double t01 = Math.min(avgTimeMin / 480.0, 1.0);
+        double k01 = Math.min(avgDistanceKm / 50.0, 1.0);
+
+        double score = (0.5 * d01) + (0.25 * t01) + (0.25 * k01);   // 0..1
+        return score * 10 <= 3.0;
     }
 }

@@ -18,5 +18,7 @@ public record TourDto(
         long durationSec,
         RouteGeometry routeGeoJson,
         String imageFilename,
-        long ownerId
+        long ownerId,
+        int popularity,
+        Boolean childFriendly
 ) {}
