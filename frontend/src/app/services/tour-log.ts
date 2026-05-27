@@ -1,16 +1,45 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { TourLog } from '../models/tour-log';
+import { inject, Injectable, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { TourLog, CreateTourLogRequest } from '../models/tour-log';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TourLogService {
-  private logs: TourLog[] = [
-    { id: 1, tourId: 1, date: '2026-03-01', comment: 'Tolle Tour!', difficulty: 2, totalDistance: 15, totalTime: 180, rating: 5 }
-  ];
+  private http = inject(HttpClient);
+  private base = `${environment.apiUrl}/api/tours`;
 
-  getById(id:number): Observable<TourLog | undefined> { return of(this.logs.find(l => l.id === id)); }
-  getByTourId(tourId: number): Observable<TourLog[]> { return of(this.logs.filter(l => l.tourId === tourId)); }
-  create(log: TourLog): Observable<TourLog> { log.id = Date.now(); this.logs.push(log); return of(log); }
-  update(updated: TourLog): Observable<TourLog> { this.logs = this.logs.map(l => l.id === updated.id ? updated : l); return of(updated); }
-  delete(id: number): Observable<void> { this.logs = this.logs.filter(l => l.id !== id); return of(void 0); }
+  // logs for the CURRENT tour (replaced when context switches)
+  private _logs = signal<TourLog[]>([]);
+  readonly logs = this._logs.asReadonly();
+
+  async loadAll(tourId: number): Promise<void> {
+    const list = await firstValueFrom(this.http.get<TourLog[]>(`${this.base}/${tourId}/logs`));
+    this._logs.set(list);
+  }
+
+  async getById(tourId: number, id: number): Promise<TourLog> {
+    return firstValueFrom(this.http.get<TourLog>(`${this.base}/${tourId}/logs/${id}`));
+  }
+
+  async create(tourId: number, req: CreateTourLogRequest): Promise<TourLog> {
+    const created = await firstValueFrom(
+      this.http.post<TourLog>(`${this.base}/${tourId}/logs`, req)
+    );
+    this._logs.update(list => [...list, created]);
+    return created;
+  }
+
+  async update(tourId: number, id: number, req: CreateTourLogRequest): Promise<TourLog> {
+    const updated = await firstValueFrom(
+      this.http.put<TourLog>(`${this.base}/${tourId}/logs/${id}`, req)
+    );
+    this._logs.update(list => list.map(l => l.id === id ? updated : l));
+    return updated;
+  }
+
+  async delete(tourId: number, id: number): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.base}/${tourId}/logs/${id}`));
+    this._logs.update(list => list.filter(l => l.id !== id));
+  }
 }

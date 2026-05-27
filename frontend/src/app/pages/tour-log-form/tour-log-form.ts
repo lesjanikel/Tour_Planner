@@ -1,65 +1,85 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { form, FormField, required, min, max, minLength } from '@angular/forms/signals';
 import { TourLogService } from '../../services/tour-log';
-import { TourLog } from '../../models/tour-log';
-import {ErrorList} from '../../shared/error-list/error-list';
+import { CreateTourLogRequest } from '../../models/tour-log';
+
+interface LogFormData {
+  dateTime: string;
+  comment: string;
+  difficulty: number;
+  totalDistance: number;
+  totalTime: number;
+  rating: number;
+}
 
 @Component({
   selector: 'app-tour-log-form',
-  standalone: true,
-  imports: [FormsModule, ErrorList],
+  imports: [FormField],
   templateUrl: './tour-log-form.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TourLogForm implements OnInit {
-  log: TourLog = { id: 0, tourId: 0, date: '', comment: '', difficulty: 1, totalDistance: 0, totalTime: 0, rating: 1 };
-  errors: string[] = [];
-  isEdit = false;
+export class TourLogForm {
   private tourLogService = inject(TourLogService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
+  tourId = +this.route.snapshot.paramMap.get('id')!;
+  logIdParam = this.route.snapshot.paramMap.get('logId');
+  isEdit = !!this.logIdParam;
+  submitted = signal(false);
 
-  ngOnInit() {
-    this.log.tourId = +this.route.snapshot.paramMap.get('id')!;
-    const logId = this.route.snapshot.paramMap.get('logId');
-    if(logId){
-      this.isEdit = true;
-      this.tourLogService.getById(+logId).subscribe(log => {if(log) this.log = {...log}; })
+  model = signal<LogFormData>({
+    dateTime: '',
+    comment: '',
+    difficulty: 1,
+    totalDistance: 0,
+    totalTime: 0,
+    rating: 1,
+  });
+
+  logForm = form(this.model, (path) => {
+    required(path.dateTime, { message: 'Date is required' });
+    minLength(path.comment, 3, { message: 'Comment must be at least 3 characters' });
+    min(path.difficulty, 1, { message: '1–5' });
+    max(path.difficulty, 5, { message: '1–5' });
+    min(path.rating, 1, { message: '1–5' });
+    max(path.rating, 5, { message: '1–5' });
+    min(path.totalDistance, 0, { message: 'Must be ≥ 0' });
+    min(path.totalTime, 0, { message: 'Must be ≥ 0' });
+  });
+
+  constructor() {
+    if (this.isEdit) {
+      this.tourLogService.getById(this.tourId, +this.logIdParam!).then(l => {
+        this.model.set({
+          dateTime: l.dateTime.slice(0, 16),   // ISO → datetime-local "YYYY-MM-DDThh:mm"
+          comment: l.comment,
+          difficulty: l.difficulty,
+          totalDistance: l.totalDistance,
+          totalTime: l.totalTime,
+          rating: l.rating,
+        });
+      });
     }
   }
 
-  save() {
-    this.errors = [];
-    if (!this.log.date) {
-      this.errors.push('Date is required.');
-    }
-    if (!this.log.comment || this.log.comment.trim().length < 3) {
-      this.errors.push('Comment must be at least 3 characters.');
-    }
-    if (this.log.totalDistance < 0) {
-      this.errors.push('Distance cannot be negative.');
-    }
-    if (this.log.totalTime < 0) {
-      this.errors.push('Time cannot be negative.');
-    }
-    if (this.log.difficulty < 1 || this.log.difficulty > 5) {
-      this.errors.push('Difficulty must be between 1 and 5.');
-    }
-    if (this.log.rating < 1 || this.log.rating > 5) {
-      this.errors.push('Rating must be between 1 and 5.');
-    }
+  async save() {
+    this.submitted.set(true);
+    if (!this.logForm().valid()) return;
 
-    if (this.errors.length > 0) return;
+    const m = this.model();
+    // datetime-local sends "YYYY-MM-DDThh:mm" — backend's LocalDateTime needs seconds
+    const dateTime = m.dateTime.length === 16 ? m.dateTime + ':00' : m.dateTime;
+    const req: CreateTourLogRequest = { ...m, dateTime };
 
-    if(this.isEdit){
-      this.tourLogService.update(this.log).subscribe(() => this.router.navigate(['/tours', this.log.tourId]));
+    if (this.isEdit) {
+      await this.tourLogService.update(this.tourId, +this.logIdParam!, req);
+    } else {
+      await this.tourLogService.create(this.tourId, req);
     }
-    else{
-      this.tourLogService.create(this.log).subscribe(() => this.router.navigate(['/tours', this.log.tourId]));
-    }
-
+    this.router.navigate(['/tours', this.tourId]);
   }
 
-  cancel() { this.router.navigate(['/tours', this.log.tourId]); }
+  cancel() { this.router.navigate(['/tours', this.tourId]); }
 }
