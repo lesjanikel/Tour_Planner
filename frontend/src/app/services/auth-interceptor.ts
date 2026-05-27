@@ -1,0 +1,13 @@
+import { HttpInterceptorFn } from '@angular/common/http';
+import {environment} from '../../environments/environment';
+
+export const authInterceptor: HttpInterceptorFn = (req, next) => {
+  // adds jwt bearer token automatically to every outbound request
+  const token = localStorage.getItem('token');
+  if (token && req.url.startsWith(environment.apiUrl)) {
+    req = req.clone({
+      setHeaders: { Authorization: `Bearer ${token}` }
+    });
+  }
+  return next(req);
+};

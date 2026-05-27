@@ -63,7 +63,13 @@
         }
         <label class="text-sm">I accept the user agreement</label>
       </div>
-      <button type="submit" class="w-full bg-gray-600 text-white py-2 rounded">Create account</button>
+      @if (error()) {
+        <p class="text-red-600 text-sm">{{ error() }}</p>
+      }
+      <button type="submit" [disabled]="loading()"
+              class="w-full bg-gray-600 text-white py-2 rounded disabled:opacity-50">
+        {{ loading() ? '…' : 'Create Account' }}
+      </button>
     </form>
   </div>
 </div>

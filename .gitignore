@@ -2,6 +2,7 @@
 .idea/
 *.iml
 out/
+images/*
 
 # --- VS Code (frontend/.gitignore whitelists project-shared configs) ---
 .vscode/
