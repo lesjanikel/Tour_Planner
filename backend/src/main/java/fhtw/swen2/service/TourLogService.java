@@ -26,18 +26,20 @@ public class TourLogService {
 
     @Transactional(readOnly = true)
     public List<TourLogDto> findAll(long tourId,User requester){
-        loadOwnedTour(tourId, requester);
+        tourRepository.findByIdAndOwnerId(tourId,requester.getId()).orElseThrow(() -> new NotFoundException("Tour not found: " + tourId));
         return tourLogRepository.findByTourId(tourId).stream()
                 .map(this::toDto)
                 .toList();
     }
     @Transactional(readOnly = true)
-    public TourLogDto findById(long tourId, long tourLogId, User user) {
-        return toDto(loadOwnedTourLog(tourLogId, tourId, user));
+    public TourLogDto findById(long tourId, long tourLogId, User requester) {
+        TourLog tourLog = tourLogRepository.findByIdAndTourIdAndTourOwnerId(tourLogId,tourId,requester.getId())
+                .orElseThrow(() -> new NotFoundException("Tourlog not found: " +tourLogId));
+        return toDto(tourLog);
     }
 
     public TourLogDto create(CreateTourLogRequest request, long tourId, User requester){
-        Tour tour = loadOwnedTour(tourId, requester);
+        Tour tour = tourRepository.findByIdAndOwnerId(tourId,requester.getId()).orElseThrow(() -> new NotFoundException("Tour not found: " + tourId));
 
         TourLog tourLog = new TourLog();
         tourLog.setTour(tour);
@@ -52,7 +54,8 @@ public class TourLogService {
     }
 
     public TourLogDto update(long tourId, long tourLogId, CreateTourLogRequest request, User requester ){
-        TourLog tourLog = loadOwnedTourLog(tourLogId, tourId, requester);
+        TourLog tourLog = tourLogRepository.findByIdAndTourIdAndTourOwnerId(tourLogId,tourId,requester.getId())
+                .orElseThrow(() -> new NotFoundException("Tourlog not found: " +tourLogId));
         tourLog.setComment(request.comment());
         tourLog.setDifficulty(request.difficulty());
         tourLog.setRating(request.rating());
@@ -63,29 +66,13 @@ public class TourLogService {
     }
 
     public void delete(long tourId, long tourLogId, User requester){
-        TourLog tourLog  = loadOwnedTourLog(tourLogId, tourId, requester);
+        TourLog tourLog = tourLogRepository.findByIdAndTourIdAndTourOwnerId(tourLogId,tourId,requester.getId())
+                .orElseThrow(() -> new NotFoundException("Tourlog not found: " +tourLogId));
         tourLogRepository.delete(tourLog);
     }
 
-    private Tour loadOwnedTour(long id, User requester) {
-        Tour tour = tourRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tour not found: " + id));
-        if (tour.getOwner().getId() != requester.getId()) {
-            throw new NotFoundException("Tour not found: " + id);
-        }
-        return tour;
-    }
 
-    private TourLog loadOwnedTourLog(long id, long tourId, User requester) {
-        TourLog tourLog = tourLogRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Tourlog not found: " + id));
 
-        Tour tour = tourLog.getTour();
-        if (tour.getOwner().getId()!= requester.getId() || tour.getId() != tourId) {
-            throw new NotFoundException("Tourlog not found: " + id);
-        }
-        return tourLog;
-    }
     private TourLogDto toDto(TourLog tourLog) {
         return new TourLogDto(
                 tourLog.getId(),

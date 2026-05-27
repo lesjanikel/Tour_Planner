@@ -11,6 +11,7 @@ import fhtw.swen2.service.client.ors.OrsClient;
 import fhtw.swen2.service.client.ors.OrsRouteResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,10 +21,12 @@ public class TourService {
 
     private final TourRepository tourRepository;
     private final OrsClient orsClient;
+    private final ImageStorageService imageStorageService;
 
-    public TourService(TourRepository tourRepository, OrsClient orsClient){
+    public TourService(TourRepository tourRepository, OrsClient orsClient, ImageStorageService imageStorageService){
         this.tourRepository = tourRepository;
         this.orsClient = orsClient;
+        this.imageStorageService = imageStorageService;
     }
 
     @Transactional(readOnly = true)
@@ -35,7 +38,9 @@ public class TourService {
 
     @Transactional(readOnly = true)
     public TourDto findById(long id, User requester) {
-        return toDto(loadOwned(id, requester));
+        Tour tour = tourRepository.findByIdAndOwnerId(id,requester.getId())
+                .orElseThrow(() -> new NotFoundException("Tour not found: " + id));
+        return toDto(tour);
     }
 
     public TourDto create(CreateTourRequest request, User requester) {
@@ -62,7 +67,8 @@ public class TourService {
     }
 
     public TourDto update(long id, CreateTourRequest request, User requester) {
-        Tour tour = loadOwned(id, requester);
+        Tour tour = tourRepository.findByIdAndOwnerId(id,requester.getId())
+                .orElseThrow(() -> new NotFoundException("Tour not found: " + id));
         tour.setName(request.name());
         tour.setDescription(request.description());
         tour.setFromName(request.fromName());
@@ -84,32 +90,48 @@ public class TourService {
     }
 
     public void delete(long id, User requester) {
-        Tour tour = loadOwned(id, requester);
+        Tour tour = tourRepository.findByIdAndOwnerId(id,requester.getId())
+                .orElseThrow(() -> new NotFoundException("Tour not found: " + id));
+        if(tour.getImageFilename() != null){
+            imageStorageService.delete(tour.getImageFilename());
+        }
         tourRepository.delete(tour);
     }
 
-    private Tour loadOwned(long id, User requester) {
-        Tour tour = tourRepository.findById(id)
+    public TourDto setImage(long id, MultipartFile file, User requester) {
+        Tour tour = tourRepository.findByIdAndOwnerId(id, requester.getId())
                 .orElseThrow(() -> new NotFoundException("Tour not found: " + id));
-        if (tour.getOwner().getId() != requester.getId()) {
-            throw new NotFoundException("Tour not found: " + id);
+        if (tour.getImageFilename() != null) {
+            imageStorageService.delete(tour.getImageFilename());     // remove old
         }
-        return tour;
+        String filename = imageStorageService.store(file,id);
+        tour.setImageFilename(filename);
+        return toDto(tour);                                    // already exists, stays private
     }
 
-    private TourDto toDto(Tour tour) {
+    public TourDto clearImage(long id, User requester) {
+        Tour tour = tourRepository.findByIdAndOwnerId(id, requester.getId())
+                .orElseThrow(() -> new NotFoundException("Tour not found: " + id));
+        if (tour.getImageFilename() != null) {
+            imageStorageService.delete(tour.getImageFilename());
+            tour.setImageFilename(null);
+        }
+        return toDto(tour);
+    }
+
+        private TourDto toDto(Tour tour) {
 
 
         List<TourLog> tourLogs = tour.getLogs();
         int popularity = tourLogs.size();
         Boolean childFriendly = computeChildFriendly(tourLogs);
-
+        String imageUrl = tour.getImageFilename() == null ? null : "/images/" + tour.getImageFilename();
         return new TourDto(
                 tour.getId(), tour.getName(), tour.getDescription(),
                 tour.getFromName(), tour.getFromLat(), tour.getFromLon(),
                 tour.getToName(), tour.getToLat(), tour.getToLon(),
                 tour.getTransportType(), tour.getDistanceKm(), tour.getDurationSec(),
-                tour.getRouteGeoJson(), tour.getImageFilename(),
+                tour.getRouteGeoJson(), imageUrl,
                 tour.getOwner().getId(),
                 popularity,childFriendly
         );

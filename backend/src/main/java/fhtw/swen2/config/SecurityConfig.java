@@ -40,6 +40,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/api/users").permitAll()      // register
                         .requestMatchers(HttpMethod.POST, "/api/sessions").permitAll()   // login
                         .requestMatchers("/v3/api-docs","/v3/api-docs/**","/swagger-ui.html","/swagger-ui/**").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/images/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
