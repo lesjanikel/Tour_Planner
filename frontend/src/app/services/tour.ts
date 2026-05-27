@@ -26,6 +26,23 @@ export class TourService {
     this._tours.update(list => [...list, created]);
     return created;
   }
+  async setImage(tourId: number, file: File): Promise<Tour> {
+    const formData = new FormData();
+    formData.append('file', file);
+    const updated = await firstValueFrom(
+      this.http.post<Tour>(`${this.base}/${tourId}/image`, formData)
+    );
+    this._tours.update(list => list.map(t => t.id === tourId ? updated : t));
+    return updated;
+  }
+
+  async clearImage(tourId: number): Promise<Tour> {
+    const updated = await firstValueFrom(
+      this.http.delete<Tour>(`${this.base}/${tourId}/image`)
+    );
+    this._tours.update(list => list.map(t => t.id === tourId ? updated : t));
+    return updated;
+  }
 
   async update(id: number, req: CreateTourRequest): Promise<Tour> {
     const updated = await firstValueFrom(this.http.put<Tour>(`${this.base}/${id}`, req));

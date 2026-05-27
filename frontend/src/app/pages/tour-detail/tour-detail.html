@@ -34,10 +34,40 @@
     </div>
 
     @if (tour()!.imageUrl) {
-      <img [src]="tour()!.imageUrl" alt="{{ tour()!.name }}" class="w-full h-48 object-cover rounded mb-4" />
+      <div class="relative mb-4">
+        <img
+          [src]="apiUrl + tour()!.imageUrl"
+          alt="{{ tour()!.name }}"
+          class="w-full h-48 object-cover rounded" />
+        <div class="absolute top-2 right-2 flex gap-2">
+          <button
+            (click)="fileInput.click()"
+            class="bg-white/90 px-3 py-1 rounded text-sm hover:bg-white shadow">
+            Change
+          </button>
+          <button
+            (click)="removeImage()"
+            class="bg-white/90 px-3 py-1 rounded text-sm hover:bg-white text-red-600 shadow">
+            Remove
+          </button>
+        </div>
+      </div>
     } @else {
-      <div class="bg-gray-200 h-48 flex items-center justify-center text-gray-400 rounded mb-4">No image available</div>
+      <div class="bg-gray-200 h-48 flex items-center justify-center rounded mb-4">
+        <button
+          (click)="fileInput.click()"
+          class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          Upload image
+        </button>
+      </div>
     }
+
+    <input
+      #fileInput
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      (change)="onFileSelected($event)"
+      hidden />
   }
 
   <div id="map" class="bg-gray-200 h-48 rounded mb-6"></div>
