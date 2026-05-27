@@ -15,6 +15,7 @@ import {
 } from '../../models/tour';
 import { AddressAutocomplete } from '../../shared/address-autocomplete/address-autocomplete';
 import { GeocodeFeature } from '../../services/geocode';
+import {extractError, ToastService} from '../../services/toast';
 
 interface TourFormData {
   name: string;
@@ -38,10 +39,12 @@ export class TourForm {
   private tourService = inject(TourService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
+  private toast = inject(ToastService)
 
   isEdit = false;
   editId = 0;
   submitted = signal(false);
+  saving = signal(false);
 
   // single source of truth for the whole form
   model = signal<TourFormData>({
@@ -121,12 +124,22 @@ export class TourForm {
   async save() {
     this.submitted.set(true);
     if (!this.tourForm().valid()) return;
+    if(this.saving()) return;
 
-    const req = this.model() as CreateTourRequest;
-    const t = this.isEdit
-      ? await this.tourService.update(this.editId, req)
-      : await this.tourService.create(req);
-    this.router.navigate(['/tours', t.id]);
+    this.saving.set(true);
+    try {
+      const req = this.model() as CreateTourRequest;
+      const t = this.isEdit
+        ? await this.tourService.update(this.editId, req)
+        : await this.tourService.create(req);
+      this.toast.success(this.isEdit ? 'Tour updated' : 'Tour created');
+      this.router.navigate(['/tours', t.id]);
+    } catch (err) {
+      this.toast.error(extractError(err, 'Could not save tour'));
+    } finally {
+      this.saving.set(false);
+    }
+
   }
 
   cancel() { this.router.navigate(['/tours']); }

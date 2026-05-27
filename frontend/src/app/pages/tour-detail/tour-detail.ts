@@ -9,6 +9,7 @@ import {DatePipe, DecimalPipe} from '@angular/common';
 import {Tour} from '../../models/tour';
 import { TRANSPORT_LABELS} from '../../models/tour';
 import {environment} from '../../../environments/environment';
+import {extractError, ToastService} from '../../services/toast';
 
 @Component({
   selector: 'app-tour-detail',
@@ -22,6 +23,7 @@ export class TourDetail implements AfterViewInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private mapFacadeService = inject(MapFacadeService);
+  private toast = inject(ToastService)
 
 
   private id = +this.route.snapshot.paramMap.get('id')!;
@@ -33,8 +35,14 @@ export class TourDetail implements AfterViewInit {
   deleteLogTarget = signal<number | null>(null);
 
   constructor() {
-    this.tourService.getById(this.id).then(t => this.tour.set(t));
-    this.tourLogService.loadAll(this.id);
+    this.tourService.getById(this.id)
+      .then(t => this.tour.set(t))
+      .catch(err => {
+        this.toast.error(extractError(err, 'Could not load tour'));
+        this.router.navigate(['/tours']);
+      });
+    this.tourLogService.loadAll(this.id)
+      .catch(err => this.toast.error(extractError(err, 'Could not load logs')));
 
     effect(() => {
       const t = this.tour();
@@ -59,9 +67,15 @@ export class TourDetail implements AfterViewInit {
   deleteLog(id: number) { this.deleteLogTarget.set(id); }
 
   async confirmDeleteLog() {
-    await this.tourLogService.delete(this.id, this.deleteLogTarget()!);
-    this.deleteLogTarget.set(null);
-    this.tour.set(await this.tourService.getById(this.id))
+    try {
+      await this.tourLogService.delete(this.id, this.deleteLogTarget()!);
+      this.tour.set(await this.tourService.getById(this.id));
+      this.toast.success('Log deleted');
+    } catch (err) {
+      this.toast.error(extractError(err, 'Could not delete log'));
+    } finally {
+      this.deleteLogTarget.set(null);
+    }
   }
 
   async onFileSelected(event: Event) {
@@ -70,8 +84,11 @@ export class TourDetail implements AfterViewInit {
     try {
       const updated = await this.tourService.setImage(this.id, file);
       this.tour.set(updated);
-    } catch {
-      // optional: toast / alert
+      this.toast.success('Image uploaded');
+    } catch (err) {
+      this.toast.error(extractError(err, 'Upload failed'));
+    } finally {
+      (event.target as HTMLInputElement).value = '';
     }
     (event.target as HTMLInputElement).value = '';   // reset so same file can be re-picked
   }

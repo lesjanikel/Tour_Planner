@@ -58,7 +58,9 @@
     </div>
 
     <div class="flex gap-3 pt-2">
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
+      <button type="submit" [disabled]="saving()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+        {{ saving() ? 'Saving…' : 'Save' }}
+      </button>
       <button type="button" (click)="cancel()" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Cancel</button>
     </div>
   </form>

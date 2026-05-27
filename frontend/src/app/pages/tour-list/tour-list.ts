@@ -13,6 +13,7 @@ import { ConfirmModal } from '../../shared/confirm-modal/confirm-modal';
 import { AchievementsService } from '../../services/achievements';
 import { AchievementsComponent } from './achievements/achievements';
 import {DecimalPipe} from '@angular/common';
+import {extractError, ToastService} from '../../services/toast';
 
 @Component({
   selector: 'app-tour-list',
@@ -24,6 +25,7 @@ export class TourList {
   private tourService = inject(TourService);
   private router = inject(Router);
   private achievementsService = inject(AchievementsService);
+  private toast = inject(ToastService)
 
   tours= this.tourService.tours;
   search= signal('');
@@ -48,8 +50,13 @@ export class TourList {
   delete(id: number) { this.deleteTarget.set(id); }
 
   async confirmDelete() {
-    await this.tourService.delete(this.deleteTarget()!);
-    this.deleteTarget.set(null);
-    // notice: no local .update() — the service already removed it from `_tours`
+    try {
+      await this.tourService.delete(this.deleteTarget()!);
+      this.toast.success('Tour deleted');
+    } catch (err) {
+      this.toast.error(extractError(err, 'Could not delete tour'));
+    } finally {
+      this.deleteTarget.set(null);   // close modal either way
+    }
   }
 }
