@@ -1,17 +1,40 @@
-import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
-import { Tour } from '../models/tour';
+import {inject, Injectable, signal} from '@angular/core';
+import {firstValueFrom} from 'rxjs';
+import {CreateTourRequest, Tour} from '../models/tour';
+import {HttpClient} from '@angular/common/http';
+import {environment} from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class TourService {
-  private tours: Tour[] = [
-    { id: 1, name: 'Wienerwald Hike', description: 'Scenic hike through the Wienerwald', from: 'Vienna', to: 'Klosterneuburg', transportType: 'Hike', distance: 15, estimatedTime: 180, imagePath: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800"},
-    { id: 2, name: 'Donauradweg', description: 'Cycling tour along the Danube', from: 'Vienna', to: 'Tulln', transportType: 'Bike', distance: 40, estimatedTime: 120, imagePath: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800" }
-  ];
+  private http = inject(HttpClient);
+  private base = `${environment.apiUrl}/api/tours`;
 
-  getAll(): Observable<Tour[]> { return of(this.tours); }
-  getById(id: number): Observable<Tour | undefined> { return of(this.tours.find(t => t.id === id)); }
-  create(tour: Tour): Observable<Tour> { tour.id = Date.now(); this.tours.push(tour); return of(tour); }
-  update(updated: Tour): Observable<Tour> { this.tours = this.tours.map(t => t.id === updated.id ? updated : t); return of(updated); }
-  delete(id: number): Observable<void> { this.tours = this.tours.filter(t => t.id !== id); return of(void 0); }
+  private _tours = signal<Tour[]>([]);
+  readonly tours = this._tours.asReadonly();
+
+  async loadAll(): Promise<void> {
+    const list = await firstValueFrom(this.http.get<Tour[]>(this.base));
+    this._tours.set(list);
+  }
+
+  async getById(id: number): Promise<Tour> {
+    return firstValueFrom(this.http.get<Tour>(`${this.base}/${id}`));
+  }
+
+  async create(req: CreateTourRequest): Promise<Tour> {
+    const created = await firstValueFrom(this.http.post<Tour>(this.base, req));
+    this._tours.update(list => [...list, created]);
+    return created;
+  }
+
+  async update(id: number, req: CreateTourRequest): Promise<Tour> {
+    const updated = await firstValueFrom(this.http.put<Tour>(`${this.base}/${id}`, req));
+    this._tours.update(list => list.map(t => t.id === id ? updated : t));
+    return updated;
+  }
+
+  async delete(id: number): Promise<void> {
+    await firstValueFrom(this.http.delete<void>(`${this.base}/${id}`));
+    this._tours.update(list => list.filter(t => t.id !== id));
+  }
 }

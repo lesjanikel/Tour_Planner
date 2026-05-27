@@ -9,9 +9,9 @@ export class AchievementsService {
 
     const achievements: Achievement[] = [];
 
-    const totalDistance = tours.reduce((sum, t) => sum + t.distance, 0);
-    const totalTime = tours.reduce((sum, t) => sum + t.estimatedTime, 0);
-    const longestTour = Math.max(...tours.map(t => t.distance), 0);
+    const totalDistance = tours.reduce((sum, t) => sum + t.distanceKm, 0);
+    const totalTime = tours.reduce((sum, t) => sum + t.durationSec/60, 0);
+    const longestTour = Math.max(...tours.map(t => t.distanceKm), 0);
     const transportTypes = new Set(tours.map(t => t.transportType));
 
     if (tours.length >= 10) {

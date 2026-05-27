@@ -2,74 +2,76 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TourService } from '../../services/tour';
-import { Tour } from '../../models/tour';
+import { CreateTourRequest, TransportType } from '../../models/tour';
+import { AddressAutocomplete } from '../../shared/address-autocomplete/address-autocomplete';
+import { GeocodeFeature } from '../../services/geocode';
 
 @Component({
   selector: 'app-tour-form',
   standalone: true,
-  imports: [ ReactiveFormsModule ],
+  imports: [ReactiveFormsModule, AddressAutocomplete],
   templateUrl: './tour-form.html',
 })
 export class TourForm implements OnInit {
-  tour: Tour = { id: 0, name: '', description: '', from: '', to: '', transportType: 'Hike', distance: 0, estimatedTime: 0, imagePath: '' };
   isEdit = false;
+  editId = 0;
+  initialFromName = '';
+  initialToName   = '';
+
   form = new FormGroup({
-    name: new FormControl('', [
-      Validators.required,
-      Validators.minLength(3)
-    ]),
-
-    description: new FormControl('', [
-      Validators.required,
-      Validators.minLength(3)
-    ]),
-
-    from: new FormControl('', [ Validators.required ]),
-
-    to: new FormControl('', [ Validators.required ]),
-
-    transportType: new FormControl('Hike', [ Validators.required ]),
-
-    distance: new FormControl(0, [ Validators.min(0) ]),
-
-    estimatedTime: new FormControl(0, [ Validators.min(0) ]),
-
-    imagePath: new FormControl('')
+    name:        new FormControl('', [Validators.required, Validators.minLength(3)]),
+    description: new FormControl('', [Validators.required, Validators.minLength(3)]),
+    fromName:    new FormControl('', [Validators.required]),
+    fromLat:     new FormControl<number | null>(null, [Validators.required]),
+    fromLon:     new FormControl<number | null>(null, [Validators.required]),
+    toName:      new FormControl('', [Validators.required]),
+    toLat:       new FormControl<number | null>(null, [Validators.required]),
+    toLon:       new FormControl<number | null>(null, [Validators.required]),
+    transportType: new FormControl<TransportType>('FOOT_HIKING', [Validators.required]),
   });
 
   private tourService = inject(TourService);
   private router = inject(Router);
   private route = inject(ActivatedRoute);
 
-  ngOnInit() {
+  async ngOnInit() {
     const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.isEdit = true;
-      this.tourService.getById(+id).subscribe(t => {
-        if (t) {
-          this.tour = {...t};
-          this.form.patchValue(t);
-        }
-      });
-    }
+    if (!id) return;
+
+    this.isEdit = true;
+    this.editId = +id;
+    const t = await this.tourService.getById(+id);
+    this.form.patchValue({
+      name: t.name, description: t.description,
+      fromName: t.fromName, fromLat: t.fromLat, fromLon: t.fromLon,
+      toName:   t.toName,   toLat:   t.toLat,   toLon:   t.toLon,
+      transportType: t.transportType,
+    });
+    this.initialFromName = t.fromName;
+    this.initialToName   = t.toName;
   }
 
-  save() {
-    if (this.form.invalid) {
-      this.form.markAllAsTouched();
-      return;
-    }
+  onFromSelected(f: GeocodeFeature) {
+    this.form.patchValue({ fromName: f.label, fromLat: f.lat, fromLon: f.lon });
+  }
+  onFromTextChanged(text: string) {
+    this.form.patchValue({ fromName: text, fromLat: null, fromLon: null });
+  }
 
-    this.tour = {
-      ...this.tour,
-      ...this.form.value
-    } as Tour;
+  onToSelected(f: GeocodeFeature) {
+    this.form.patchValue({ toName: f.label, toLat: f.lat, toLon: f.lon });
+  }
+  onToTextChanged(text: string) {
+    this.form.patchValue({ toName: text, toLat: null, toLon: null });
+  }
 
-    if (this.isEdit) {
-      this.tourService.update(this.tour).subscribe(() => this.router.navigate(['/tours', this.tour.id]));
-    } else {
-      this.tourService.create(this.tour).subscribe(t => this.router.navigate(['/tours', t.id]));
-    }
+  async save() {
+    if (this.form.invalid) { this.form.markAllAsTouched(); return; }
+    const req = this.form.getRawValue() as CreateTourRequest;
+    const t = this.isEdit
+      ? await this.tourService.update(this.editId, req)
+      : await this.tourService.create(req);
+    this.router.navigate(['/tours', t.id]);
   }
 
   cancel() { this.router.navigate(['/tours']); }

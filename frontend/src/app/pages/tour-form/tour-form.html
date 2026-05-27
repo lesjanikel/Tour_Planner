@@ -36,48 +36,38 @@
     <div class="flex gap-4">
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">From</label>
-        <input formControlName="from" name="from" class="w-full border rounded px-3 py-2" required />
-        @if (
-          form.controls.from.touched &&
-          form.controls.from.errors?.['required']
-          ) {
-          <p class="text-red-600 text-sm mt-1"> Starting location is required. </p>
+        <app-address-autocomplete
+          [initialValue]="initialFromName"
+          placeholder="Starting location"
+          (selected)="onFromSelected($event)"
+          (textChanged)="onFromTextChanged($event)" />
+        @if (form.controls.fromLat.touched && form.controls.fromLat.errors?.['required']) {
+          <p class="text-red-600 text-sm mt-1">Pick a suggestion from the dropdown.</p>
         }
       </div>
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">To</label>
-        <input formControlName="to" name="to" class="w-full border rounded px-3 py-2" required />
-        @if (
-          form.controls.to.touched &&
-          form.controls.to.errors?.['required']
-          ) {
-          <p class="text-red-600 text-sm mt-1"> Destination is required. </p>
+        <app-address-autocomplete
+          [initialValue]="initialToName"
+          placeholder="Destination"
+          (selected)="onToSelected($event)"
+          (textChanged)="onToTextChanged($event)" />
+        @if (form.controls.toLat.touched && form.controls.toLat.errors?.['required']) {
+          <p class="text-red-600 text-sm mt-1">Pick a suggestion from the dropdown.</p>
         }
       </div>
     </div>
+
     <div>
       <label class="block text-sm font-medium mb-1">Transport</label>
-      <select formControlName="transportType" name="transportType" class="w-full border rounded px-3 py-2">
-        <option>Hike</option>
-        <option>Bike</option>
-        <option>Running</option>
-        <option>Train</option>
+      <select formControlName="transportType" class="w-full border rounded px-3 py-2">
+        <option value="FOOT_HIKING">Hiking</option>
+        <option value="FOOT_WALKING">Walking</option>
+        <option value="CYCLING_REGULAR">Cycling</option>
+        <option value="DRIVING_CAR">Driving</option>
       </select>
     </div>
-    <div class="flex gap-4">
-      <div class="flex-1">
-        <label class="block text-sm font-medium mb-1">Distance (km)</label>
-        <input formControlName="distance" name="distance" type="number" class="w-full border rounded px-3 py-2" />
-      </div>
-      <div class="flex-1">
-        <label class="block text-sm font-medium mb-1">Time (min)</label>
-        <input formControlName="estimatedTime" name="estimatedTime" type="number" class="w-full border rounded px-3 py-2" />
-      </div>
-    </div>
-    <div>
-      <label class="block text-sm font-medium mb-1">Image Path</label>
-      <input formControlName="imagePath" name="imageUrl" class="w-full border rounded px-3 py-2" required />
-    </div>
+
     <div class="flex gap-3 pt-2">
       <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">Save</button>
       <button type="button" (click)="cancel()" class="bg-gray-200 px-4 py-2 rounded hover:bg-gray-300">Cancel</button>

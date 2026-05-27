@@ -1,17 +1,17 @@
 <div class="bg-gray-200 p-4 mb-4 flex items-center gap-6">
   <div class="w-40 h-24 bg-gray-400"></div>
   <div class="text-sm">
-    <p>{{ totalDistance }} km</p>
-    <p>{{ totalTime }}h</p>
+    <p>{{ totalDistance()| number:'1.1-1' }} km</p>
+    <p>{{ totalTime() }}h</p>
   </div>
   <div class="ml-auto">
-    <app-achievements [achievements]="achievements"></app-achievements>
+    <app-achievements [achievements]="achievements()"></app-achievements>
   </div>
 </div>
 
 <div class="max-w-3xl mx-auto p-4">
   <div class="flex gap-4 mb-4">
-    <input [(ngModel)]="search" name="search" placeholder="Search Box" class="flex-1 border px-3 py-2 rounded" />
+    <input [ngModel]="search()" (ngModelChange)="search.set($event)" name="search" placeholder="Search Box" class="flex-1 border px-3 py-2 rounded" />
     <button class="bg-gray-200 px-4 py-2 rounded">Filter</button>
   </div>
 
@@ -29,8 +29,7 @@
 </div>
 
 <app-confirm-modal
-  [visible]="deleteTarget !== null"
+  [visible]="deleteTarget() !== null"
   message="Are you sure you want to delete this tour?"
   (yes)="confirmDelete()"
-  (no)="deleteTarget = null"
-/>
+  (no)="deleteTarget.set(null)" />

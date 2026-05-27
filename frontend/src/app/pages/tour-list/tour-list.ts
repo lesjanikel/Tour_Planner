@@ -1,68 +1,55 @@
-import { Component, inject, OnInit, DestroyRef } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  Component,
+  ChangeDetectionStrategy,
+  inject,
+  signal,
+  computed,
+} from '@angular/core';
 import { Router } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { TourService } from '../../services/tour';
 import { Tour } from '../../models/tour';
 import { ConfirmModal } from '../../shared/confirm-modal/confirm-modal';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AchievementsService } from '../../services/achievements';
-import { Achievement } from '../../models/achievement';
 import { AchievementsComponent } from './achievements/achievements';
+import {DecimalPipe} from '@angular/common';
 
 @Component({
   selector: 'app-tour-list',
-  standalone: true,
-  imports: [FormsModule, ConfirmModal, AchievementsComponent],
+  imports: [FormsModule, ConfirmModal, AchievementsComponent, DecimalPipe],
   templateUrl: './tour-list.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class TourList implements OnInit {
-  tours: Tour[] = [];
-  search = '';
-  totalDistance = 0;
-  totalTime = 0;
-  achievements: Achievement[] = [];
-  deleteTarget: number|null = null;
-
+export class TourList {
   private tourService = inject(TourService);
   private router = inject(Router);
-  private destroyRef = inject(DestroyRef);
   private achievementsService = inject(AchievementsService);
 
-  loadTours() {
-    this.tourService.getAll().pipe(takeUntilDestroyed(this.destroyRef)).subscribe(data => {
-      this.tours = data;
-      this.totalDistance = data.reduce((s, t) => s + t.distance, 0);
-      this.totalTime = Math.round(data.reduce((s, t) => s + t.estimatedTime, 0) / 60);
-      this.achievements = this.achievementsService.getAchievements(data);
-    });
+  tours= this.tourService.tours;
+  search= signal('');
+  deleteTarget= signal<number | null>(null);
+
+  filteredTours = computed(() => {
+    const q = this.search().toLowerCase();
+    return this.tours().filter(t => t.name.toLowerCase().includes(q));
+  });
+  totalDistance = computed(() => this.tours().reduce((s, t) => s + t.distanceKm, 0));
+  totalTime     = computed(() =>
+    Math.round(this.tours().reduce((s, t) => s + t.durationSec / 60, 0) / 60)
+  );
+  achievements  = computed(() => this.achievementsService.getAchievements(this.tours()));
+
+  constructor() {
+    this.tourService.loadAll();      // fires once, service fills its own signal
   }
 
-  ngOnInit() {
-    this.loadTours();
-  }
+  edit(id: number)   { this.router.navigate(['/tours', id, 'edit']); }
+  detail(id: number) { this.router.navigate(['/tours', id]); }
+  delete(id: number) { this.deleteTarget.set(id); }
 
-  filteredTours() {
-    return this.tours.filter(t =>
-      t.name.toLowerCase().includes(this.search.toLowerCase())
-    );
-  }
-
-  edit(id: number) {
-    this.router.navigate(['/tours', id, 'edit']);
-  }
-
-  delete(id: number) {
-    this.deleteTarget = id;
-  }
-
-  confirmDelete(){
-    this.tourService.delete(this.deleteTarget!).subscribe(() => {
-      this.deleteTarget = null;
-      this.loadTours();
-    })
-  }
-
-  protected detail(id: number) {
-    this.router.navigate(['/tours', id]);
+  async confirmDelete() {
+    await this.tourService.delete(this.deleteTarget()!);
+    this.deleteTarget.set(null);
+    // notice: no local .update() — the service already removed it from `_tours`
   }
 }
