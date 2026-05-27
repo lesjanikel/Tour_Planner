@@ -1,58 +1,48 @@
 <div class="max-w-xl mx-auto p-6">
   <h1 class="text-2xl font-bold mb-6">{{ isEdit ? 'Edit tour' : 'New Tour' }}</h1>
 
-  <form [formGroup]="form" (ngSubmit)="save()" class="space-y-4">
+  <form (submit)="save(); $event.preventDefault()" class="space-y-4">
+
     <div>
       <label class="block text-sm font-medium mb-1">Name</label>
-      <input formControlName="name" name="name" class="w-full border rounded px-3 py-2" required />
-      @if (
-        form.controls.name.touched &&
-        form.controls.name.errors?.['required']
-        ) { <p class="text-red-600 text-sm mt-1"> Name is required. </p>
-      }
-
-      @if (
-        form.controls.name.touched &&
-        form.controls.name.errors?.['minlength']
-        ) { <p class="text-red-600 text-sm mt-1"> Name must be at least 3 characters long. </p>
+      <input [formField]="tourForm.name" class="w-full border rounded px-3 py-2" />
+      @if ((tourForm.name().touched() || submitted()) && !tourForm.name().valid()) {
+        @for (err of tourForm.name().errors(); track err.kind) {
+          <p class="text-red-600 text-sm mt-1">{{ err.message }}</p>
+        }
       }
     </div>
+
     <div>
       <label class="block text-sm font-medium mb-1">Description</label>
-      <textarea formControlName="description" name="description" class="w-full border rounded px-3 py-2"></textarea>
-      @if (
-        form.controls.description.touched &&
-        form.controls.description.errors?.['required']
-        ) { <p class="text-red-600 text-sm mt-1"> Description is required. </p>
-      }
-
-      @if (
-        form.controls.description.touched &&
-        form.controls.description.errors?.['minlength']
-        ) {
-        <p class="text-red-600 text-sm mt-1"> Description must be at least 3 characters long. </p>
+      <textarea [formField]="tourForm.description" class="w-full border rounded px-3 py-2"></textarea>
+      @if ((tourForm.description().touched() || submitted()) && !tourForm.description().valid()) {
+        @for (err of tourForm.description().errors(); track err.kind) {
+          <p class="text-red-600 text-sm mt-1">{{ err.message }}</p>
+        }
       }
     </div>
+
     <div class="flex gap-4">
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">From</label>
         <app-address-autocomplete
-          [initialValue]="initialFromName"
-          placeholder="Starting location"
-          (selected)="onFromSelected($event)"
-          (textChanged)="onFromTextChanged($event)" />
-        @if (form.controls.fromLat.touched && form.controls.fromLat.errors?.['required']) {
+          [value]="tourForm.fromName().value()"
+          [placeholder]="'Starting location'"
+          (valueChange)="onFromTextChanged($event)"
+          (selected)="onFromSelected($event)" />
+        @if (submitted() && !tourForm.fromLat().valid()) {
           <p class="text-red-600 text-sm mt-1">Pick a suggestion from the dropdown.</p>
         }
       </div>
       <div class="flex-1">
         <label class="block text-sm font-medium mb-1">To</label>
         <app-address-autocomplete
-          [initialValue]="initialToName"
-          placeholder="Destination"
-          (selected)="onToSelected($event)"
-          (textChanged)="onToTextChanged($event)" />
-        @if (form.controls.toLat.touched && form.controls.toLat.errors?.['required']) {
+          [value]="tourForm.toName().value()"
+          [placeholder]="'Destination'"
+          (valueChange)="onToTextChanged($event)"
+          (selected)="onToSelected($event)" />
+        @if (submitted() && !tourForm.toLat().valid()) {
           <p class="text-red-600 text-sm mt-1">Pick a suggestion from the dropdown.</p>
         }
       </div>
@@ -60,11 +50,10 @@
 
     <div>
       <label class="block text-sm font-medium mb-1">Transport</label>
-      <select formControlName="transportType" class="w-full border rounded px-3 py-2">
-        <option value="FOOT_HIKING">Hiking</option>
-        <option value="FOOT_WALKING">Walking</option>
-        <option value="CYCLING_REGULAR">Cycling</option>
-        <option value="DRIVING_CAR">Driving</option>
+      <select [formField]="tourForm.transportType" class="w-full border rounded px-3 py-2">
+        @for (key of transportKeys; track key) {
+          <option [value]="key">{{ transportLabels[key] }}</option>
+        }
       </select>
     </div>
 

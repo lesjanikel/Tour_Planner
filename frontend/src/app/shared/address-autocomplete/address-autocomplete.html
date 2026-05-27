@@ -1,13 +1,15 @@
 <div class="relative">
-  <input [formControl]="query" [placeholder]="placeholder"
-         class="w-full border rounded px-3 py-2"
-         (focus)="open.set(suggestions().length > 0)"
-         (blur)="closeLater()" />
+  <input
+    [value]="value()"
+    [placeholder]="placeholder()"
+    class="w-full border rounded px-3 py-2"
+    (input)="onInput($event)"
+    (focus)="open.set(suggestions().length > 0)"
+    (blur)="closeLater()" />
   @if (open()) {
     <ul class="absolute z-10 w-full bg-white border rounded shadow max-h-60 overflow-y-auto">
       @for (s of suggestions(); track $index) {
-        <li (mousedown)="pick(s)"
-            class="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm">
+        <li (mousedown)="pick(s)" class="px-3 py-2 hover:bg-gray-100 cursor-pointer text-sm">
           <div>{{ s.label }}</div>
           <div class="text-gray-500 text-xs">{{ s.country }} · {{ s.layer }}</div>
         </li>

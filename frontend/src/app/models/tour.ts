@@ -4,6 +4,12 @@ export type TransportType =
   | 'FOOT_WALKING'
   | 'FOOT_HIKING';
 
+export const TRANSPORT_LABELS: Record<TransportType, string> = {
+  FOOT_HIKING:     'Hiking',
+  FOOT_WALKING:    'Walking',
+  CYCLING_REGULAR: 'Cycling',
+  DRIVING_CAR:     'Driving',
+};
 export interface RouteGeometry {
   type: string;
   coordinates: number[][];   // [[lon,lat], ...]

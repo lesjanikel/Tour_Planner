@@ -7,6 +7,7 @@ import { ConfirmModal } from '../../shared/confirm-modal/confirm-modal';
 import { MapFacadeService } from '../../services/map-facade-service';
 import {DecimalPipe} from '@angular/common';
 import {Tour} from '../../models/tour';
+import { TRANSPORT_LABELS} from '../../models/tour';
 
 @Component({
   selector: 'app-tour-detail',
@@ -22,6 +23,7 @@ export class TourDetail implements AfterViewInit {
   private mapFacadeService = inject(MapFacadeService);
 
   private id = +this.route.snapshot.paramMap.get('id')!;
+  protected readonly transportLabels = TRANSPORT_LABELS;
 
   tour = signal<Tour | undefined>(undefined);
   logs = signal<TourLog[]>([]);
