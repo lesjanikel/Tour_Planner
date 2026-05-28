@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 @Table(name = "tour_logs")
@@ -15,6 +16,7 @@ public class TourLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @JsonBackReference
     @ManyToOne(optional = false)
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
