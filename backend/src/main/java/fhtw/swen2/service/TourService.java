@@ -134,8 +134,8 @@ public class TourService {
     }
 
     public ResponseEntity<byte[]> export(long id, User user) throws Exception {
-        Tour tour = tourRepository.findById(id)
-                .orElseThrow();
+        Tour tour = tourRepository.findByIdAndOwnerId(id, user.getId())
+                .orElseThrow(() -> new NotFoundException("Tour not found: " + id));
 
         byte[] json = objectMapper.writeValueAsBytes(tour);
 
