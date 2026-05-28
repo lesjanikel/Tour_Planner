@@ -12,7 +12,28 @@ interface AuthResponse {
 export class AuthService {
   private http = inject(HttpClient);
 
-  user = signal<string | null>(localStorage.getItem('user'));
+  user = signal<string | null>(this.loadValidUser());
+
+  private loadValidUser(): string | null {
+    const token = localStorage.getItem('token');
+    const user  = localStorage.getItem('user');
+    if (!token || !user) return null;
+    if (this.isTokenExpired(token)) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
+    }
+    return user;
+  }
+
+  private isTokenExpired(token: string): boolean {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true;
+    }
+  }
 
   isLoggedIn(): boolean {
     return this.user() !== null;
