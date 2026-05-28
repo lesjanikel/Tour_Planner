@@ -73,6 +73,7 @@ public class Tour {
     private User owner;
 
     @JsonManagedReference
+    @OrderBy("dateTime desc")
     @OneToMany(mappedBy = "tour", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TourLog> logs = new ArrayList<>();
 }
