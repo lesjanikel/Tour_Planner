@@ -16,6 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.Set;
+import java.util.stream.Collectors;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ValidationException;
 
 import java.util.List;
 
@@ -161,6 +165,7 @@ public class TourService {
 
         imported.setId(0);
         imported.setOwner(user);
+        imported.getLogs().forEach(log -> log.setId(0));
 
         //if 0
         if (imported.getDistanceKm() == 0 || imported.getRouteGeoJson() == null) {
