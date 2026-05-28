@@ -14,7 +14,16 @@
     <input [ngModel]="search()"
            (ngModelChange)="updateSearch($event)"
            name="search" placeholder="Search Box" class="flex-1 border px-3 py-2 rounded" />
-    <button class="bg-gray-200 px-4 py-2 rounded">Filter</button>
+    <div class="flex gap-2 items-center bg-gray-200 px-4 py-2 rounded">
+      <label class="flex items-center gap-1 text-sm">
+        <input type="checkbox" (change)="filterChildFriendly.set($event.target.checked)" />
+        Child-friendly
+      </label>
+      <label class="flex items-center gap-1 text-sm">
+        <input type="checkbox" (change)="filterPopular.set($event.target.checked)" />
+        Popular
+      </label>
+    </div>
     <label class="bg-gray-200 px-4 py-2 rounded cursor-pointer">
       Import Tour
       <input

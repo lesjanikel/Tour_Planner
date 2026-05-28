@@ -31,7 +31,15 @@ export class TourList {
   search= signal('');
   deleteTarget= signal<number | null>(null);
 
-  filteredTours = computed(() => this.tours());
+  filterChildFriendly = signal(false);
+  filterPopular = signal(false);
+
+  filteredTours = computed(() => {
+    let list = this.tours();
+    if (this.filterChildFriendly()) list = list.filter(t => t.childFriendly === true);
+    if (this.filterPopular())       list = list.filter(t => t.popularity >= 2);
+    return list;
+  });
 
   totalDistance = computed(() => this.tours().reduce((s, t) => s + t.distanceKm, 0));
   totalTime     = computed(() =>
