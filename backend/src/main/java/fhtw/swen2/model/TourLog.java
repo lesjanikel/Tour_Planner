@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
@@ -21,6 +22,7 @@ public class TourLog {
     @JoinColumn(name = "tour_id", nullable = false)
     private Tour tour;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(nullable = false)
     private LocalDateTime dateTime;
 
