@@ -27,12 +27,14 @@ public class TourService {
     private final OrsClient orsClient;
     private final ImageStorageService imageStorageService;
     private final ObjectMapper objectMapper;
+    private final jakarta.validation.Validator validator;
 
     public TourService(TourRepository tourRepository, OrsClient orsClient, ImageStorageService imageStorageService, ObjectMapper objectMapper){
         this.tourRepository = tourRepository;
         this.orsClient = orsClient;
         this.imageStorageService = imageStorageService;
         this.objectMapper = objectMapper;
+        this.validator = jakarta.validation.Validation.buildDefaultValidatorFactory().getValidator();
     }
 
     @Transactional(readOnly = true)
@@ -149,28 +151,30 @@ public class TourService {
     public TourDto importTour(MultipartFile file, User user) throws Exception {
         Tour imported = objectMapper.readValue(file.getBytes(), Tour.class);
 
-        Tour tour = new Tour();
-        tour.setName(imported.getName());
-        tour.setDescription(imported.getDescription());
-        tour.setFromName(imported.getFromName());
-        tour.setFromLat(imported.getFromLat());
-        tour.setFromLon(imported.getFromLon());
-        tour.setToName(imported.getToName());
-        tour.setToLat(imported.getToLat());
-        tour.setToLon(imported.getToLon());
-        tour.setTransportType(imported.getTransportType());
-        tour.setOwner(user);
+      //validation
+        Set<ConstraintViolation<Tour>> violations = validator.validate(imported);
+        if (!violations.isEmpty()) {
+            throw new ValidationException("Invalid tour data: " +
+                    violations.stream().map(v -> v.getPropertyPath() + " " + v.getMessage())
+                            .collect(Collectors.joining(", ")));
+        }
 
-        OrsRouteResult route = orsClient.directions(
-                imported.getFromLat(), imported.getFromLon(),
-                imported.getToLat(), imported.getToLon(),
-                imported.getTransportType()
-        );
-        tour.setDistanceKm(route.distanceKm());
-        tour.setDurationSec(route.durationSec());
-        tour.setRouteGeoJson(route.geometry());
+        imported.setId(0);
+        imported.setOwner(user);
 
-        return toDto(tourRepository.save(tour));
+        //if 0
+        if (imported.getDistanceKm() == 0 || imported.getRouteGeoJson() == null) {
+            OrsRouteResult route = orsClient.directions(
+                    imported.getFromLat(), imported.getFromLon(),
+                    imported.getToLat(), imported.getToLon(),
+                    imported.getTransportType()
+            );
+            imported.setDistanceKm(route.distanceKm());
+            imported.setDurationSec(route.durationSec());
+            imported.setRouteGeoJson(route.geometry());
+        }
+
+        return toDto(tourRepository.save(imported));
     }
 
         private TourDto toDto(Tour tour) {
