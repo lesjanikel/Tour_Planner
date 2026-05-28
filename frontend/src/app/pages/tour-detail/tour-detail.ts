@@ -93,6 +93,19 @@ export class TourDetail implements AfterViewInit {
     (event.target as HTMLInputElement).value = '';   // reset so same file can be re-picked
   }
 
+  async exportTour() {
+    const file = await this.tourService.export(this.id);
+
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = `tour-${this.id}.json`;
+    a.click();
+
+    URL.revokeObjectURL(url);
+  }
+
   async removeImage() {
     const updated = await this.tourService.clearImage(this.id);
     this.tour.set(updated);

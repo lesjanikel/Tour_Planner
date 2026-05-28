@@ -31,10 +31,8 @@ export class TourList {
   search= signal('');
   deleteTarget= signal<number | null>(null);
 
-  filteredTours = computed(() => {
-    const q = this.search().toLowerCase();
-    return this.tours().filter(t => t.name.toLowerCase().includes(q));
-  });
+  filteredTours = computed(() => this.tours());
+
   totalDistance = computed(() => this.tours().reduce((s, t) => s + t.distanceKm, 0));
   totalTime     = computed(() =>
     Math.round(this.tours().reduce((s, t) => s + t.durationSec / 60, 0) / 60)
@@ -43,6 +41,20 @@ export class TourList {
 
   constructor() {
     this.tourService.loadAll();      // fires once, service fills its own signal
+  }
+  async updateSearch(value: string) {
+    this.search.set(value);
+    await this.tourService.search(value);
+  }
+
+  async importTour(event: Event) {
+    const input = event.target as HTMLInputElement;
+
+    if (!input.files?.length) {
+      return;
+    }
+
+    await this.tourService.import(input.files[0]);
   }
 
   edit(id: number)   { this.router.navigate(['/tours', id, 'edit']); }

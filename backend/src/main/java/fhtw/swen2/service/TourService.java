@@ -12,6 +12,10 @@ import fhtw.swen2.service.client.ors.OrsRouteResult;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.util.List;
 
@@ -22,11 +26,13 @@ public class TourService {
     private final TourRepository tourRepository;
     private final OrsClient orsClient;
     private final ImageStorageService imageStorageService;
+    private final ObjectMapper objectMapper;
 
-    public TourService(TourRepository tourRepository, OrsClient orsClient, ImageStorageService imageStorageService){
+    public TourService(TourRepository tourRepository, OrsClient orsClient, ImageStorageService imageStorageService, ObjectMapper objectMapper){
         this.tourRepository = tourRepository;
         this.orsClient = orsClient;
         this.imageStorageService = imageStorageService;
+        this.objectMapper = objectMapper;
     }
 
     @Transactional(readOnly = true)
@@ -117,6 +123,38 @@ public class TourService {
             tour.setImageFilename(null);
         }
         return toDto(tour);
+    }
+
+    @Transactional(readOnly = true)
+    public List<TourDto> search(String query, User requester) {
+        return tourRepository.search(requester.getId(), query)
+                .stream()
+                .map(this::toDto)
+                .toList();
+    }
+
+    public ResponseEntity<byte[]> export(long id, User user) throws Exception {
+        Tour tour = tourRepository.findById(id)
+                .orElseThrow();
+
+        byte[] json = objectMapper.writeValueAsBytes(tour);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=tour-" + id + ".json")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(json);
+    }
+
+    public TourDto importTour(MultipartFile file, User user) throws Exception {
+        Tour tour = objectMapper.readValue(file.getBytes(), Tour.class);
+
+        tour.setId(0);
+        tour.setOwner(user);
+
+        Tour saved = tourRepository.save(tour);
+
+        return toDto(saved);
     }
 
         private TourDto toDto(Tour tour) {

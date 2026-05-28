@@ -17,6 +17,35 @@ export class TourService {
     this._tours.set(list);
   }
 
+  async search(query: string): Promise<void> {
+    const list = await firstValueFrom(
+      this.http.get<Tour[]>(`${this.base}/search`, {
+        params: { q: query }
+      })
+    );
+
+    this._tours.set(list);
+  }
+
+  async export(id: number): Promise<Blob> {
+    return await firstValueFrom(
+      this.http.get(`${this.base}/${id}/export`, {
+        responseType: 'blob'
+      })
+    );
+  }
+
+  async import(file: File): Promise<void> {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const created = await firstValueFrom(
+      this.http.post<Tour>(`${this.base}/import`, formData)
+    );
+
+    this._tours.update(list => [...list, created]);
+  }
+
   async getById(id: number): Promise<Tour> {
     return firstValueFrom(this.http.get<Tour>(`${this.base}/${id}`));
   }
