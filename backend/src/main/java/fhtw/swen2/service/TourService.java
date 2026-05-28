@@ -147,14 +147,30 @@ public class TourService {
     }
 
     public TourDto importTour(MultipartFile file, User user) throws Exception {
-        Tour tour = objectMapper.readValue(file.getBytes(), Tour.class);
+        Tour imported = objectMapper.readValue(file.getBytes(), Tour.class);
 
-        tour.setId(0);
+        Tour tour = new Tour();
+        tour.setName(imported.getName());
+        tour.setDescription(imported.getDescription());
+        tour.setFromName(imported.getFromName());
+        tour.setFromLat(imported.getFromLat());
+        tour.setFromLon(imported.getFromLon());
+        tour.setToName(imported.getToName());
+        tour.setToLat(imported.getToLat());
+        tour.setToLon(imported.getToLon());
+        tour.setTransportType(imported.getTransportType());
         tour.setOwner(user);
 
-        Tour saved = tourRepository.save(tour);
+        OrsRouteResult route = orsClient.directions(
+                imported.getFromLat(), imported.getFromLon(),
+                imported.getToLat(), imported.getToLon(),
+                imported.getTransportType()
+        );
+        tour.setDistanceKm(route.distanceKm());
+        tour.setDurationSec(route.durationSec());
+        tour.setRouteGeoJson(route.geometry());
 
-        return toDto(saved);
+        return toDto(tourRepository.save(tour));
     }
 
         private TourDto toDto(Tour tour) {
