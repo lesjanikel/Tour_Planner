@@ -42,10 +42,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
     public ProblemDetail handleAccessDenied(AccessDeniedException ex) {
+        log.warn("Access denied: {}", ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access denied");
     }
     @ExceptionHandler(UpstreamUnavailableException.class)
     public ProblemDetail handleUpstream(UpstreamUnavailableException ex) {
+        log.warn("Upstream service unavailable: {}", ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
     }
     @ExceptionHandler(MaxUploadSizeExceededException.class)

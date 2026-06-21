@@ -6,6 +6,8 @@ import fhtw.swen2.dto.RegisterRequest;
 import fhtw.swen2.model.User;
 import fhtw.swen2.repository.UserRepository;
 import fhtw.swen2.security.JwtService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class AuthService {
+
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -35,13 +39,18 @@ public class AuthService {
         user.setUsername(req.username());
         user.setPasswordHash(passwordEncoder.encode(req.password()));
         userRepository.save(user);
+        log.info("Registered new user '{}'", user.getUsername());
         return new AuthResponse(jwtService.generateToken(user.getUsername()), user.getUsername());
     }
 
     public AuthResponse login(LoginRequest req) {
         User user = userRepository.findByUsername(req.username())
-                .orElseThrow(() -> new BadCredentialsException("Invalid credentials"));
+                .orElseThrow(() -> {
+                    log.warn("Failed login attempt for unknown username '{}'", req.username());
+                    return new BadCredentialsException("Invalid credentials");
+                });
         if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
+            log.warn("Failed login attempt for user '{}': wrong password", req.username());
             throw new BadCredentialsException("Invalid credentials");
         }
         return new AuthResponse(jwtService.generateToken(user.getUsername()), user.getUsername());
