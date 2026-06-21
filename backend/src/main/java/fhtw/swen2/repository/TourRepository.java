@@ -12,6 +12,8 @@ import java.util.Optional;
 public interface TourRepository extends JpaRepository<Tour, Long> {
     List<Tour> findByOwnerId(long ownerId);
     Optional<Tour> findByIdAndOwnerId(long id, long ownerId);
+    boolean existsByOwnerIdAndNameIgnoreCaseAndFromNameIgnoreCaseAndToNameIgnoreCase(
+            long ownerId, String name, String fromName, String toName);
 
 // Search tours by tour fields and log comments
     @Query("""

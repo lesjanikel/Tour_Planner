@@ -35,6 +35,11 @@ export interface Tour {
   childFriendly: boolean | null;
 }
 
+export interface ImportResult {
+  imported: Tour[];
+  duplicates: string[];
+}
+
 export interface CreateTourRequest {
   name: string;
   description: string;

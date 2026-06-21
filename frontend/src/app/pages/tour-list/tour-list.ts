@@ -62,7 +62,30 @@ export class TourList {
       return;
     }
 
-    await this.tourService.import(input.files[0]);
+    try {
+      const result = await this.tourService.import(input.files[0]);
+      if (result.imported.length) {
+        this.toast.success(`Imported ${result.imported.length} tour(s)`);
+      }
+      for (const name of result.duplicates) {
+        this.toast.info(`Tour "${name}" already exists`);
+      }
+    } catch (err) {
+      this.toast.error(extractError(err, 'Could not import tour'));
+    }
+  }
+
+  async exportAllTours() {
+    const file = await this.tourService.exportAll();
+
+    const url = URL.createObjectURL(file);
+    const a = document.createElement('a');
+
+    a.href = url;
+    a.download = 'tours-export.json';
+    a.click();
+
+    URL.revokeObjectURL(url);
   }
 
   edit(id: number)   { this.router.navigate(['/tours', id, 'edit']); }

@@ -1,6 +1,6 @@
 import {inject, Injectable, signal} from '@angular/core';
 import {firstValueFrom} from 'rxjs';
-import {CreateTourRequest, Tour} from '../models/tour';
+import {CreateTourRequest, ImportResult, Tour} from '../models/tour';
 import {HttpClient} from '@angular/common/http';
 import {environment} from '../../environments/environment';
 
@@ -35,15 +35,24 @@ export class TourService {
     );
   }
 
-  async import(file: File): Promise<void> {
+  async exportAll(): Promise<Blob> {
+    return await firstValueFrom(
+      this.http.get(`${this.base}/export`, {
+        responseType: 'blob'
+      })
+    );
+  }
+
+  async import(file: File): Promise<ImportResult> {
     const formData = new FormData();
     formData.append('file', file);
 
-    const created = await firstValueFrom(
-      this.http.post<Tour>(`${this.base}/import`, formData)
+    const result = await firstValueFrom(
+      this.http.post<ImportResult>(`${this.base}/import`, formData)
     );
 
-    this._tours.update(list => [...list, created]);
+    this._tours.update(list => [...list, ...result.imported]);
+    return result;
   }
 
   async getById(id: number): Promise<Tour> {

@@ -1,6 +1,7 @@
 package fhtw.swen2.controller;
 
 import fhtw.swen2.dto.CreateTourRequest;
+import fhtw.swen2.dto.ImportResult;
 import fhtw.swen2.dto.TourDto;
 import fhtw.swen2.model.User;
 import fhtw.swen2.service.TourService;
@@ -45,6 +46,11 @@ public class TourController {
         return tourService.export(id, user);
     }
 
+    @GetMapping("/export")
+    public ResponseEntity<byte[]> exportAll(@AuthenticationPrincipal User user) throws Exception {
+        return tourService.exportAll(user);
+    }
+
     @PostMapping
     public ResponseEntity<TourDto> create(@Valid @RequestBody CreateTourRequest req,
                                           @AuthenticationPrincipal User user) {
@@ -52,7 +58,7 @@ public class TourController {
     }
 
     @PostMapping("/import")
-    public TourDto importTour(@RequestParam MultipartFile file,
+    public ImportResult importTour(@RequestParam MultipartFile file,
                               @AuthenticationPrincipal User user) throws Exception {
         return tourService.importTour(file, user);
     }
