@@ -1,15 +1,16 @@
 <div>
-  <h3 class="font-semibold mb-2">
+  <h3 class="font-semibold mb-2 text-base text-gray-600 uppercase tracking-wide">
     Achievements
   </h3>
 
-  @for (achievement of achievements; track achievement.title) {
-    <div class="text-sm">
-      {{ achievement.icon }} {{ achievement.title }}
-    </div>
-  }
-
-  @if (achievements.length === 0) {
+  @if (achievements.length > 0) {
+    @for (achievement of achievements; track achievement.title) {
+      <div class="flex items-center gap-1.5 text-sm">
+        <span class="text-base">{{ achievement.icon }}</span>
+        {{ achievement.title }}
+      </div>
+    }
+  } @else {
     <div class="text-sm text-gray-500">
       No achievements yet
     </div>
