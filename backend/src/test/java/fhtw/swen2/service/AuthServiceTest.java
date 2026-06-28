@@ -55,4 +55,23 @@ class AuthServiceTest {
         assertEquals("alice", res.username());
         assertEquals("jwt-token", res.token());
     }
+
+    @Test
+    void login_throwsForUnknownUser() {
+        // logging in with a username that doesn't exist must fail
+        when(userRepository.findByUsername("ghost")).thenReturn(Optional.empty());
+        assertThrows(BadCredentialsException.class, () -> authService.login(new LoginRequest("ghost", "password1")));
+    }
+
+    @Test
+    void login_throwsForWrongPassword() {
+        // a known user with the wrong password must be rejected
+        User user = new User();
+        user.setUsername("alice");
+        user.setPasswordHash("hashed");
+        when(userRepository.findByUsername("alice")).thenReturn(Optional.of(user));
+        when(passwordEncoder.matches("wrong", "hashed")).thenReturn(false);
+
+        assertThrows(BadCredentialsException.class, () -> authService.login(new LoginRequest("alice", "wrong")));
+    }
 }
