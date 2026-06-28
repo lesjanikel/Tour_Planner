@@ -1,17 +1,29 @@
 import { TestBed } from '@angular/core/testing';
-import { CanActivateFn } from '@angular/router';
+import { Router, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+import { vi } from 'vitest';
+import { guestGuard } from './guest-guard';
+import { AuthService } from '../services/auth';
 
-import { guestGuardGuard } from './guest-guard-guard';
-
-describe('guestGuardGuard', () => {
-  const executeGuard: CanActivateFn = (...guardParameters) => 
-      TestBed.runInInjectionContext(() => guestGuardGuard(...guardParameters));
+describe('guestGuard', () => {
+  let authService: { isLoggedIn: ReturnType<typeof vi.fn> };
+  let router: { parseUrl: ReturnType<typeof vi.fn> };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    authService = { isLoggedIn: vi.fn() };
+    router = { parseUrl: vi.fn().mockReturnValue({}) };
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: AuthService, useValue: authService },
+        { provide: Router, useValue: router },
+      ],
+    });
   });
 
-  it('should be created', () => {
-    expect(executeGuard).toBeTruthy();
+  it('allows navigation when the user is not logged in', () => {
+    authService.isLoggedIn.mockReturnValue(false);
+    const result = TestBed.runInInjectionContext(() =>
+      guestGuard({} as ActivatedRouteSnapshot, {} as RouterStateSnapshot));
+    expect(result).toBe(true);
   });
+
 });
