@@ -1,6 +1,7 @@
 package fhtw.swen2.service.client.ors;
 
 import fhtw.swen2.config.OrsClientProperties;
+import fhtw.swen2.exception.InvalidRouteException;
 import fhtw.swen2.exception.NotFoundException;
 import fhtw.swen2.exception.UpstreamUnavailableException;
 import fhtw.swen2.model.RouteGeometry;
@@ -14,6 +15,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
@@ -35,7 +37,7 @@ public class OrsWebClient implements OrsClient {
         var body = new OrsDirectionsRequest(List.of(
                 List.of(fromLon, fromLat),   // ORS expects LON, LAT
                 List.of(toLon, toLat)
-        ));
+        ), true);   // geometry_simplify: ask ORS for a lighter line
 
         OrsDirectionsResponse res = wc.post()
                 .uri("/v2/directions/{profile}/geojson", profileFor(transportType))
@@ -46,6 +48,8 @@ public class OrsWebClient implements OrsClient {
                         .flatMap(b -> {
                             int sc = r.statusCode().value();
                             if (sc == 404) return Mono.error(new NotFoundException("No route between points"));
+                            if (b.contains("\"code\":2004")) return Mono.error(new InvalidRouteException(
+                                    "The route is too long to calculate. Please choose start and end points that are closer together."));
                             return Mono.error(new UpstreamUnavailableException("ORS " + sc + ": " + b));
                         }))
                 .onStatus(HttpStatusCode::is5xxServerError, r -> r.bodyToMono(String.class)
@@ -59,15 +63,30 @@ public class OrsWebClient implements OrsClient {
         }
         var feature = res.features().get(0);
         var summary = feature.properties().summary();
+        double distanceKm = summary.distance() / 1000.0;
         var geometry = new RouteGeometry(
                 feature.geometry().type(),
-                feature.geometry().coordinates()
+                simplify(feature.geometry().coordinates(), distanceKm)
         );
         return new OrsRouteResult(
-                summary.distance() / 1000.0,
+                distanceKm,
                 (long) summary.duration(),
                 geometry
         );
+    }
+    // Cap the number of stored points, scaled by distance, by uniform downsampling.
+    // Keeps the map line legible while bounding the size of the persisted geometry.
+    private static List<List<Double>> simplify(List<List<Double>> coords, double distanceKm) {
+        int maxPoints = (int) Math.min(500, Math.max(50, distanceKm * 10));   // ~10 pts/km, clamped to [50, 500]
+        if (coords.size() <= maxPoints) return coords;
+
+        int stride = (int) Math.ceil((double) coords.size() / maxPoints);
+        List<List<Double>> out = new ArrayList<>();
+        for (int i = 0; i < coords.size(); i += stride) out.add(coords.get(i));
+
+        var last = coords.get(coords.size() - 1);
+        if (!out.get(out.size() - 1).equals(last)) out.add(last);   // always keep the destination
+        return out;
     }
     @Override
     public List<GeocodeFeature> geocodeAutocomplete(String query, int limit) {

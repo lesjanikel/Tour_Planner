@@ -37,6 +37,7 @@ class TourFlowTest {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);
         registry.add("spring.datasource.password", postgres::getPassword);
+        registry.add("clients.ors.api-key", () -> "test-ors-key");   // ORS is mocked; just satisfy @NotBlank
     }
 
     @Autowired

@@ -45,6 +45,11 @@ public class GlobalExceptionHandler {
         log.warn("Access denied: {}", ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access denied");
     }
+    @ExceptionHandler(InvalidRouteException.class)
+    public ProblemDetail handleInvalidRoute(InvalidRouteException ex) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.UNPROCESSABLE_ENTITY, ex.getMessage());
+    }
+
     @ExceptionHandler(UpstreamUnavailableException.class)
     public ProblemDetail handleUpstream(UpstreamUnavailableException ex) {
         log.warn("Upstream service unavailable: {}", ex.getMessage());
