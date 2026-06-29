@@ -185,8 +185,11 @@ public class TourService {
         String imageContentType = null;
         String imageBase64 = null;
         if (tour.getImageFilename() != null) {
-            imageContentType = imageStorageService.contentTypeOf(tour.getImageFilename());
-            imageBase64 = Base64.getEncoder().encodeToString(imageStorageService.readBytes(tour.getImageFilename()));
+            try {
+                imageContentType = imageStorageService.contentTypeOf(tour.getImageFilename());
+                imageBase64 = Base64.getEncoder().encodeToString(imageStorageService.readBytes(tour.getImageFilename()));
+            } catch (Exception ignored) {
+            }
         }
 
         return new TourExportDto(
