@@ -14,12 +14,16 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 public class OrsWebClient implements OrsClient {
+
+    private static final Logger log = LoggerFactory.getLogger(OrsWebClient.class);
 
     private final WebClient wc;
     private final OrsClientProperties props;
@@ -59,6 +63,7 @@ public class OrsWebClient implements OrsClient {
                 .block(Duration.ofMillis(props.readTimeoutMs()));
 
         if (res == null || res.features() == null || res.features().isEmpty()) {
+            log.warn("ORS directions returned empty response for route [{},{} -> {},{}]", fromLat, fromLon, toLat, toLon);
             throw new UpstreamUnavailableException("ORS returned empty response");
         }
         var feature = res.features().get(0);
@@ -109,7 +114,10 @@ public class OrsWebClient implements OrsClient {
                 .bodyToMono(OrsGeocodeResponse.class)
                 .block(Duration.ofMillis(props.readTimeoutMs()));
 
-        if (res == null || res.features() == null) return List.of();   // empty query → empty list
+        if (res == null || res.features() == null) {
+            log.warn("ORS geocode returned null response for query '{}'", query);
+            return List.of();
+        }
 
         return res.features().stream()
                 .map(f -> new GeocodeFeature(

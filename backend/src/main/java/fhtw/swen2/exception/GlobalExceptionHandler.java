@@ -19,6 +19,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
     public ProblemDetail handleNotFound(NotFoundException exception){
+        log.warn("Not found: {}", exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, exception.getMessage());
     }
 
@@ -27,16 +28,19 @@ public class GlobalExceptionHandler {
         String detail = exception.getBindingResult().getFieldErrors().stream()
                 .map(e -> e.getField() + ": " + e.getDefaultMessage())
                 .collect(Collectors.joining("; "));
+        log.warn("Validation failed: {}", detail);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, detail);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ProblemDetail handleBadRequest(IllegalArgumentException exception) {
+        log.warn("Bad request: {}", exception.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, exception.getMessage());
     }
 
     @ExceptionHandler(org.springframework.security.authentication.BadCredentialsException.class)
     public ProblemDetail handleBadCredentials(BadCredentialsException ex) {
+        log.warn("Bad credentials: {}", ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "Invalid credentials");
     }
 
@@ -57,17 +61,20 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(MaxUploadSizeExceededException.class)
     public ProblemDetail handleTooLarge(MaxUploadSizeExceededException ex) {
+        log.warn("Upload too large: {}", ex.getMessage());
         return ProblemDetail.forStatusAndDetail(HttpStatus.PAYLOAD_TOO_LARGE,
                 "Image exceeds maximum allowed size");
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
     public ProblemDetail handleMissingPart(MissingServletRequestPartException ex) {
+        log.warn("Missing request part: {}", ex.getRequestPartName());
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
                 "Missing required part: " + ex.getRequestPartName());
     }
     @ExceptionHandler(UncheckedIOException.class)
     public ProblemDetail handleIO(UncheckedIOException ex) {
+        log.error("I/O error", ex);
         return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR,
                 "Storage error");
     }
